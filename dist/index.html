@@ -1,0 +1,310 @@
+<!doctype html><html><head><title>TODO supply a title</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="css/jsoneditor/jsoneditor.css" rel="stylesheet"><script src="js/jsoneditor/jsoneditor.js"></script><style id="test_style">body,html{
+            height: 100%;
+            margin: 0;
+        }
+        .container{
+            font-size: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .container >*{
+            display: inline-block;
+            box-sizing: border-box;
+            width:50%;
+            height: 100%;
+            vertical-align: top;
+            font-family: "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", "courier new", courier, monospace, sans-serif;
+        }</style></head><body><section class="container"><textarea id="source" class="editor" spellcheck="false"></textarea><div id="ast" class="editor"></div></section><script id="test" type="text/babel"><style>
+            /*ss<a></a>*/
+            h1 {
+                position: relative;
+                display: \(is_show?"block":"none");
+                transform: translate(0, \(y)px);
+                animation: test ease-in steps(5) 6s 3s;
+                line-height: calc(100%-\(custom_value)px);
+            }
+            h1::before {
+                content: "sss";
+            }
+        </style>
+
+        a = <a 
+            style={
+                display: is_show ? "block" : "none"
+            } 
+            data-test="test" 
+            data-test2=test
+            data-test3=\(test)
+            onclick = function(e){console.log(e)} 
+        >
+            s
+            \(a + b + <br />) 
+            \(show_more &&(<span>more</span>,<span>more</span>))
+            \(show_more &&<span>more</span>,<span>more</span>)
+            \{
+                a += b;
+                return a;
+            }
+            <b></b>
+            a
+            <c>sdfds<!--sdf
+            
+            dsf-->a</c>
+        </a>;
+        
+        <b></b>;
+        b =\(a + c)
+
+        c =\{
+            return d;
+        };
+
+        /[//]/;
+'dsad\
+';
+    `sf\
+    s$${a}df`;
+        'use strict';
+        import * as a from ''
+        import def, * as a from ''
+        import defa from ''
+        import { a as b, } from ''
+        export { a, b as b }
+        function a(a) { }
+        export default {}
+        function* a() {
+            yield /s/ / 11
+        }
+        let [, left, right, matched] = record;
+        `dfs${sdf + `sdfs${dd}df`}df`
+        u.prototype._isNumstr = function (t) { return /^[0-9 ]*$/.test(t) }
+        if (/^\/#/.test(e)) console.log(3)
+        function a(self, locals, a, b) { return a(self, locals) / b(self, locals); }
+        this.scanner.source.slice(e.slice[0])
+
+        var node = {
+            type: e.multiLine ? 'BlockComment' : 'LineComment',
+            value: this.scanner.source.slice(e.slice[0], e.slice[1])
+        };
+        var child = this.finalize(node, new JSXNode.JSXElement(opening, [], null));
+        this.finalize(node, new Node.ExportNamedDeclaration(declaration, [], null));
+        function a(a, b, { c } = ({ c1 } = 10) = [[d] = 10], ...d) { }
+        e._mutex_box = a = new this.MutexBox();
+        'use strict';
+
+
+        async (a = 2) => a + b;
+        function* a() {
+            a = { a: b = yield c } = c
+        }
+        for ({ a={ s } + s * 10 } in b);
+
+        (a = 10) = 20
+        let [a] = 10
+            //[,,,b,c]=a;
+            ((a))
+            (class a extends b { } / s / a)
+        b + class a extends b { } / s / a
+        a + async function b() { } / s / a
+        function a(a, b = function (a, b) { }) { }
+        /^[A-Za-z0-9 '\\(\\)\\+,\\-\\.\\/:=\\?]*$/.test(t)
+
+        //'use \\163trict';
+        export default ({ b }) = 10
+        export { a, b as c, d, }
+        export var a, b = c
+        import { a, b, a as b } from ''
+        a = {
+            a, b: c, get() { }, get get() { }, set sss(a) { }
+        }
+        class private1 extends aa {
+            static ["constructor"]() {
+
+            } get() { } [a]() { }
+        }
+        function a([s] = 10, { s: a } = 3) { }
+        t = +s[P >> 3], e = +s[$ >> 3], n = +s[R >> 3], r = +s[B >> 3];
+        a = +s[C >> 3], i = +s[L >> 3], o = +s[j >> 3], u = +s[N >> 3];
+        for (var M in A.on = A.on || {}, A.on) { }
+        (async function a() {
+            let { a: b = await 10 } = 10
+            await a() + b * c;
+
+        })
+        var a, let1 = 10, { d } = 20, [e] = 10;
+        void function a() { super.a }()
+        var
+            b = null == this.exactActiveClass ? l : this.exactActiveClass,
+            v = s.redirectedFrom ? m(null, tt(s.redirectedFrom), null, r) : s;
+
+        let { a: { b } = [e] = e + c * "", b, c: d = e, [d]: { d } } = b, a = 10, { a, b } = 1, { c } = [a] = { s } = { a } + s, [d] = 4;
+
+        ({ a: a = c.d = 2, b: { c } }) = b
+        let a = 10, b = 10, c;
+        [b, c, { a }, { c } = { a } = {} + b, ...d] = a;
+        [s] = a;
+        a in b
+        for ((let1) in [s]);
+        //for(;;  a){}
+        for (([a, b]) of a.b()) c: d: { }
+        for (let [a, b] = 10; ;) { }
+        for (let [a, b] = 10; ; a) { }
+        for (let [a, b] = 10; a <= 0 && A > -1; a++) { }
+        function a({ b, c }, d) { }
+        (a, b), c, d, (e, f, g), s
+        e._mutex_box * new this.MutexBox() ** new this.MutexBox()
+        function c1([a, b] = b = s, { a1, b1 }, [s = 3, d = 10] = 10) { }
+        a = { super: a }
+        function a() {
+
+        }
+
+
+        a ? { b } = 10 : { e } + 4
+        e._mutex_box = new this.MutexBox()
+
+        function a(a) {
+            return +{}
+            if (a) { }
+        }
+        function a(u) { return "Identifier" === u.type ? { type: "VariableDeclarator", id: u, init: null } : { type: "VariableDeclarator", id: u.left, init: u.right } }
+
+        function tokenize(code, options, delegate) {
+
+            return "PropertyCollection" == t.type ? (D.range = r, D.loc = o) : D = { type: e, properties: [t], range: r, loc: o }, n && D.properties.push(n), D
+
+        }
+
+        this.matchJSX('{') ? this.parseJSXExpressionAttribute() :
+            this.matchJSX('<') ? this.parseJSXElement() : this.parseJSXStringLiteralAttribute();
+
+        this.context.strict || !this.context.allowYield
+
+        a = { __proto__: [] }
+        let { a: [b] = (3, 4, 5) } = a
+
+        export default [a]
+
+        let test1\u0061asd = "\u{0000000be} \u0044 \\\\ \x44s  \ns"
+        0xad01 + 0b0110 - 0o175
+        async = [a, , b, , ...s.e, e]
+        async () => c
+        e, async () => s = await a + b * c[e], c;
+        a(...{})
+        a: { s } 0
+        function* a({ A }, B, ...S) {
+            yield1 * a + b * c.b();
+        }
+        c = { a, b: 1 + 2, c() { }, async d() { }, *e() { }, get f() { }, set f(a) { } };
+        a(...d, a);
+        a: b: if (a) console.log.d[10](); else if (b) c: d: e: { } else if (c) { } else f: while (e) { }
+
+        if (a) var a = 10 * 5 + 4, b, { c } = s
+        a[20] = 10
+        let [[c] = d] = a
+        switch (a) {
+            case a + b:
+                let let1 = "s", a, b;
+
+
+                console.log(33)
+                console.log(33),
+                    console.log(33)
+
+            case a:
+                console.log(33),
+                    console.log(33)
+                console.log(33)
+            default:
+        }
+        a
+        this
+        if (a) var a = 10 * 5 + 4, b, { c } = s
+        yield1 * a;
+
+        if (a)
+            console.log(3)
+
+        let let1, b, c = 10
+        { a: b, c() }
+        let a = 10
+
+        //let,b,c
+        //let*b
+        a + c ? b + d ? c : d + c : e + {}
+        a++
+
+        if (a) { } else if (c) { } else if (a) console.log()
+
+        a: while (a) c: d: e: { eee }//sdfsdf
+        a ? b + c : { a } + a
+        function a() { } (a)
+        //(()=>{yield *console.log()})(),function a(){}(a);
+        do { } while (e)
+        //await+ a//+a+b*c[b].e()
+
+        function a([[a]]) { }
+        b
+        a: b: if (a) console.log.d[10](); else if (b) c: d: e: { } else if (c) { } else f: while (e) { }
+
+        a instanceof new a.b + b
+
+        a
+        ++
+            a instanceof a++ + b
+                (a)
+        c + 6 * +-a++
+        new b.c
+        console.log(111111111111111111, a)
+        throw a + b
+        a = [];
+        3 * 6 % a
+        c ** e
+
+
+
+
+        if (a)
+            console.log(3)
+
+        //let let,b,c=10
+        { a: b, c() }
+        6 * a % [a][b]() * c
+
+        3 + b % c * a * -+-+- ++b
+
+
+        a = { a: b, c, }
+        try {
+
+        } catch (e) {
+
+        } finally { }
+        a(a, b, ...c, ...a.b.c())
+        ssdf, { a } = 10, [a, b, ...{ b }] = a;
+        //function a([a=[22],b],[c],...{a}){//Strict mode function may not have duplicate parameter names
+        //    return b;
+        //}
+
+
+        () => 4 + 5 * 8 + a.b[d][e]()[c](), 4 + 5 * 8 + 7
+        a: b: if (a) console.log.d[10](); else if (b) c: d: e: { } else if (c) { } else f: while (e) { }
+
+        if (a) var a = 10; else var c = 10;
+
+        (function a(a, b, ) { })
+        do b: {
+            break;
+
+            continue b;
+        } while (a)
+
+
+        6 + [] * 4 + ++a * b
+
+
+        a: b: { b }
+
+        a ? b + c : { a };
+        ; 1 + 2, 6, b(); { a: b, c() }; a({ b });;; a = [, a, , b, c, d, 10, new a(), ss, , , sdfsd,];[a, b] = 4 * 5 + 64 * 112;[s, [b], { c } = 1] = a; c(a, b = c);//sdfds
+        [];//*/</script><script src="./js/test.js"></script></body></html>
