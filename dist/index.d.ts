@@ -6,7 +6,7 @@ declare function isDeclaration(node: Node): any;
 declare function isStatement(node: Node): any;
 declare function isStatementListItem(node: Node): any;
 declare function isModuleItem(node: Node): any;
-declare class Dison extends Parser {
+declare class WEBX extends Parser {
     token_hooks: Record<string, (token: Token, tokenizer?: Parser | Tokenizer) => Token>;
     TYPE_ENUMS: {
         Identifier: string;
@@ -33,7 +33,9 @@ declare class Dison extends Parser {
     isModuleItem: typeof isModuleItem;
     private _inIdentifierStart;
     private _inIdentifierPart;
+    private _is_primary_expr_start;
+    is_primary_expr_start(): boolean;
     inIdentifierStart(): number;
     inIdentifierPart(): number;
 }
-export default Dison;
+export default WEBX;

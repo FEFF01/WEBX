@@ -34,7 +34,8 @@ import {
     _SuccessCollector,
     join_content,
     extract_success,
-    parse_and_extract
+    parse_and_extract,
+    _Context
 } from './Dison/js/syntax/head'
 
 import Expressions, { PrimaryExpressions } from './Dison/js/syntax/expression'
@@ -356,7 +357,14 @@ Expressions["Element"] = {
         ]
     ]
 };
+Statements["ExpressionStatement"].push({
+    precedence: 0,
+    collector: {
+        expression: "Element",
+    }
 
+});
+Statements[""].collector.push(["error", _Or("OpeningTag", "ClosingTag", "TagPunctuator")]);
 
 const BindingExpression = {
     collector: {
@@ -377,9 +385,14 @@ const BindingBlock = {
         block: _Punctuator("\\{").walk(
             function (context: Context, index: number) {
                 let parser = context[CONTEXT.parser];
-                context.wrap(CONTEXT.inFunctionBody, true);
-                parser.parseRange(parser.SYNTAX_TREE, context, index, is_right_braces);
-                context.unwrap();
+                let _context = _Context(parser);
+                _context.store(
+                    CONTEXT.strict, context[CONTEXT.strict],
+                    CONTEXT.inFunctionBody, true,
+                    CONTEXT.allowYield, true
+                );
+                //context.wrap(CONTEXT.inFunctionBody, true);
+                parser.parseRange(parser.SYNTAX_TREE, _context, index, is_right_braces);
             }
         ).pipe(
             function (context: Context, token: Token) {
@@ -389,7 +402,6 @@ const BindingBlock = {
     }
 }
 
-//const BINDING_EXPRESSION_TREE = createMatchTree({ BindingExpression, BindingBlock });
 
 PrimaryExpressions[""].push(OpeningTag, ClosingTag);
 Expressions[""].push(OpeningTag, ClosingTag);
@@ -440,70 +452,6 @@ const SYNTAX_TREE = createMatchTree([
 
 
 
-let EXPRESSION_ITEM_PATTERN = {};
-let DECLARATION_ITEM_PATTERN = {};
-let STATEMENT_ITEM_PATTERN = {};
-let STATEMENT_LIST_ITEM_PATTERN = {};
-let MODULE_ITEM_PATTERN = {};
-for (
-    const [descriptor, patterns]
-    of
-    [
-        [
-            Expressions,
-            [EXPRESSION_ITEM_PATTERN]
-        ],
-        [
-            Declarations,
-            [DECLARATION_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
-        ],
-        [
-            Statements,
-            [STATEMENT_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
-        ],
-        [
-            ModuleDeclarations,
-            [MODULE_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
-        ],
-    ] as Array<[Record<string, any>, Array<Record<string, boolean>>]>
-) {
-    for (const key in descriptor) {
-        if (key) {
-            for (const pattern of patterns) {
-                pattern[key] = true;
-            }
-        }
-    }
-}
-
-function isExpression(node: Node) {
-    return EXPRESSION_ITEM_PATTERN[node.type];
-}
-function isDeclaration(node: Node) {
-    return DECLARATION_ITEM_PATTERN[node.type];
-}
-function isStatement(node: Node) {
-    return STATEMENT_ITEM_PATTERN[node.type];
-}
-function isStatementListItem(node: Node) {
-    return STATEMENT_LIST_ITEM_PATTERN[node.type];
-}
-function isModuleItem(node: Node) {
-    return MODULE_ITEM_PATTERN[node.type];
-}
-
-
-
-
-
-const TOKEN_TYPE_MAPPERS: Record<string, string | number> = TOKEN_TYPE_SET.reduce(
-    (map, [type, id_set]) => {
-        for (let id of id_set) {
-            map[" " + id] = type;
-        }
-        return map;
-    }, {}
-);
 
 
 function scan_tag(tokenizer: Tokenizer, start: number) {
@@ -579,9 +527,74 @@ const PRIMARY_EXPR_START_PUNCTUATORS_TREE = createSearchTree(
     createSearchTree(WEBX_PUNCTUATORS, undefined, ["/="]),
 );
 
+
+
+let EXPRESSION_ITEM_PATTERN = {};
+let DECLARATION_ITEM_PATTERN = {};
+let STATEMENT_ITEM_PATTERN = {};
+let STATEMENT_LIST_ITEM_PATTERN = {};
+let MODULE_ITEM_PATTERN = {};
+for (
+    const [descriptor, patterns]
+    of
+    [
+        [
+            Expressions,
+            [EXPRESSION_ITEM_PATTERN]
+        ],
+        [
+            Declarations,
+            [DECLARATION_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
+        ],
+        [
+            Statements,
+            [STATEMENT_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
+        ],
+        [
+            ModuleDeclarations,
+            [MODULE_ITEM_PATTERN, STATEMENT_LIST_ITEM_PATTERN]
+        ],
+    ] as Array<[Record<string, any>, Array<Record<string, boolean>>]>
+) {
+    for (const key in descriptor) {
+        if (key) {
+            for (const pattern of patterns) {
+                pattern[key] = true;
+            }
+        }
+    }
+}
+
+function isExpression(node: Node) {
+    return EXPRESSION_ITEM_PATTERN[node.type];
+}
+function isDeclaration(node: Node) {
+    return DECLARATION_ITEM_PATTERN[node.type];
+}
+function isStatement(node: Node) {
+    return STATEMENT_ITEM_PATTERN[node.type];
+}
+function isStatementListItem(node: Node) {
+    return STATEMENT_LIST_ITEM_PATTERN[node.type];
+}
+function isModuleItem(node: Node) {
+    return MODULE_ITEM_PATTERN[node.type];
+}
+
+
+const TOKEN_TYPE_MAPPERS: Record<string, string | number> = TOKEN_TYPE_SET.reduce(
+    (map, [type, id_set]) => {
+        for (let id of id_set) {
+            map[" " + id] = type;
+        }
+        return map;
+    }, {}
+);
+
+
 console.timeEnd("init");
 
-class Dison extends Parser {
+class WEBX extends Parser {
     token_hooks = token_hooks;
 
     TYPE_ENUMS = TYPE_ENUMS;
@@ -598,6 +611,14 @@ class Dison extends Parser {
     isModuleItem = isModuleItem;
     private _inIdentifierStart = Parser.prototype.inIdentifierStart;
     private _inIdentifierPart = Parser.prototype.inIdentifierPart;
+    private _is_primary_expr_start = Parser.prototype.is_primary_expr_start;
+    is_primary_expr_start() {
+        if (this.tokens.length) {
+            return this.tokens[this.tokens.length - 1].type === "Element" || this._is_primary_expr_start();
+        } else {
+            return true;
+        }
+    }
     inIdentifierStart() {
         return this.match_tree_stack[0] === ATTRIBUTES_TREE && this.input[this.index] === "-"
             ? 1 : this._inIdentifierStart();
@@ -608,4 +629,4 @@ class Dison extends Parser {
     }
 }
 
-export default Dison;
+export default WEBX;

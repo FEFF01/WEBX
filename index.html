@@ -40,13 +40,14 @@ and open the template in the editor.
         <div id="ast" class="editor"></div>
     </section>
     <script id="test" type="text/babel">
-    let font_size=10,y=10,custom_value=10;
+    <a></a><b></b>
+    let font_size=10,y=10,custom_value=10,selector_text=".test>*";
     <style>
         /*ss<a></a>*/
         .test{
             font-size:\(font_size.toFixed(1))px;
         }
-        \(name) {
+        \(selector_text) {
             position: relative;
             display: \(is_show?"block":"none");
             transform: translate(0, \(y)px);
@@ -59,8 +60,14 @@ and open the template in the editor.
     setTimeout(()=>{
         is_show=true;
         font_size+=Math.random()*10;
-        test="test1"
+        test="test1";
+        v3=0;
     },1000)
+    let v1=1,v2=4;
+    let v3 =\(
+         v1 + v2
+    );//使用了绑定初始化，v3会随着 V1 或者 V2更改而更改
+    create_element(\(v3));//这个位置最终为 create_element 方法返回的元素
     let a = <a 
         style={
             zIndex:10,
@@ -80,9 +87,10 @@ and open the template in the editor.
             <br/>
             \(show_more &&<span>more</span>)
             <br/>
+            \{show_more && (yield <span>more</span>,yield <span>more</span>)};
             <b>
                 \{
-                    v1 += v2;
+                    v1 += v2;//没有循环更改
                     return v1>2*v2?v1:v2;
                 }
                 \{
@@ -96,16 +104,17 @@ and open the template in the editor.
             
             dsf-->a</span>
         </a>;
-    create_element(\(v3));
-    let v1=1,v2=4;
-    let v3 =\(v1 + v2)
-
-    let v4 =\{
-        return v3;
-    };
     function create_element(inner_html){
-        return <b>\(inner_html)</b>;
+        return inner_html&&<b>\(inner_html)</b>;
     }
+    let test_list=[1,2,3];
+    <ul>
+    \{
+        for(let item of test_list){
+            yield <li>\(item)</li>
+        }
+    }
+    </ul>
         /[//]/;
 'dsad\
 ';

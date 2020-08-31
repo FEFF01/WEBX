@@ -14,7 +14,7 @@ export default class extends Tokenizer {
     isExpression: (token: Token) => boolean;
     isStatement: (token: Token) => boolean;
     isStatementListItem: (token: Token) => boolean;
-    get is_primary_expr_start(): boolean;
+    is_primary_expr_start(): boolean;
     err(...args: any): void;
     constructor();
     parse(input: string): any;
@@ -24,6 +24,7 @@ export default class extends Tokenizer {
     parseNode(match_tree: MatchTree, context: Context, test: (node: Node) => boolean): Node;
     parseRangeAsNode(match_tree: MatchTree, context: Context, left: number, lexcal_terminator: Validate, test: (node: Node) => boolean): Node;
     parseRangeAsExpression(context: Context, left: number, lexcal_terminator: Validate): Node;
+    parseRangeAsBlock(context: Context, left: number, lexcal_terminator?: Validate): Token;
     private _parse;
     parseCustom(root: MatchTree, context: Context, begin?: number, test?: Function): Token;
     parseRange(match_tree: MatchTree, context: Context, left: number, lexcal_terminator: Validate, test?: (node: Node) => boolean): Token;

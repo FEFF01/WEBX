@@ -21,7 +21,7 @@ export default class extends Character {
     createToken(type: string | number, range: [number, number], value?: any, start?: Position, end?: Position): Token;
     match(node: SearchTree): any;
     nextIdentifier(): Token | void;
-    get is_primary_expr_start(): boolean;
+    is_primary_expr_start(): boolean;
     nextPunctuator(): Token | void;
     nextNumeric(): Token | void;
     skipNonsenses(): boolean;

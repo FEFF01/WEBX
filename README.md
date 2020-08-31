@@ -1,25 +1,29 @@
 # WEBX
 
-##主要规则
+## 主要规则
 > * 支持 `html` 与 `js` 混合书写并根据 `\()` 和 `\{}` 描述的内容做动态数据绑定(基于语法分析的数据绑定)
 > * `\()` 为绑定表达式，该表达式绑定内部使用到的任何作用域内变量，并响应其更改
 > * `\{}` 为绑定块，类似`\()`
-> * 绑定可以发生在html元素属性、innertext、cssrule、或者js变量初始化、js方法调用参数等等
+> * 绑定可以发生在html元素属性、innertext、cssrule、或者各种js逻辑中（最小范围响应）等等
 > * 任何传达到顶级执行环境的`html`元素都将是最终渲染的元素（即使未被任何变量接收）
 
-# [AST测试链接](https://feff01.github.io/WEBX/out/index.html)
+## 只完成混合语言+数据绑定语法规则的AST解析，语法分析和其他附加部分待续
 
-# 只完成混合语言+数据绑定语法规则的AST解析，语法分析和其他附加部分待续
-
-# 预想的例子：
+## 预想
+> * 混合语言，根据语法标记由编译器基于语法分析插入数据绑定，这应该非常接近原生吧，也不容易被框架固化思想
+> * 不同于现有mv框架（自带核心部分）`webx`编译出来的文件应该和原生手写同等功能体积差别不大
+> * 不需要额外的访问器或其他中间商，效率应该与原生手写差不多
+> * [AST测试链接](https://feff01.github.io/WEBX/out/index.html)
+> * 例子：
 ```javascript
-    let font_size=10,y=10,custom_value=10;
+    <a></a><b></b>
+    let font_size=10,y=10,custom_value=10,selector_text=".test>*";
     <style>
         /*ss<a></a>*/
         .test{
             font-size:\(font_size.toFixed(1))px;
         }
-        \(name) {
+        \(selector_text) {
             position: relative;
             display: \(is_show?"block":"none");
             transform: translate(0, \(y)px);
@@ -32,7 +36,8 @@
     setTimeout(()=>{
         is_show=true;
         font_size+=Math.random()*10;
-        test="test1"
+        test="test1";
+        v3=0;
     },1000)
     let v1=1,v2=4;
     let v3 =\(
@@ -58,9 +63,10 @@
             <br/>
             \(show_more &&<span>more</span>)
             <br/>
+            \{show_more && (yield <span>more</span>,yield <span>more</span>)};
             <b>
                 \{
-                    v1 += v2;
+                    v1 += v2;//没有循环更改
                     return v1>2*v2?v1:v2;
                 }
                 \{
@@ -75,10 +81,19 @@
             dsf-->a</span>
         </a>;
     function create_element(inner_html){
-        return <b>\(inner_html)</b>;
+        return inner_html&&<b>\(inner_html)</b>;
     }
-
+    let test_list=[1,2,3];
+    <ul>
+    \{
+        for(let item of test_list){
+            yield <li>\(item)</li>
+        }
+    }
+    </ul>
 ```
+
+
 
 
  

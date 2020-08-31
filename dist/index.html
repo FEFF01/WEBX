@@ -1,4 +1,4 @@
-<!doctype html><html><head><title>TODO supply a title</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="css/jsoneditor/jsoneditor.css" rel="stylesheet"><script src="js/jsoneditor/jsoneditor.js"></script><style id="test_style">body,html{
+<!doctype html><html><head><title>TODO supply a title</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link href="js/jsoneditor/jsoneditor.css" rel="stylesheet"><script src="js/jsoneditor/jsoneditor.js"></script><style id="test_style">body,html{
             height: 100%;
             margin: 0;
         }
@@ -14,51 +14,81 @@
             height: 100%;
             vertical-align: top;
             font-family: "dejavu sans mono", "droid sans mono", consolas, monaco, "lucida console", "courier new", courier, monospace, sans-serif;
-        }</style></head><body><section class="container"><textarea id="source" class="editor" spellcheck="false"></textarea><div id="ast" class="editor"></div></section><script id="test" type="text/babel"><style>
-            /*ss<a></a>*/
-            h1 {
-                position: relative;
-                display: \(is_show?"block":"none");
-                transform: translate(0, \(y)px);
-                animation: test ease-in steps(5) 6s 3s;
-                line-height: calc(100%-\(custom_value)px);
-            }
-            h1::before {
-                content: "sss";
-            }
-        </style>
-
-        a = <a 
-            style={
-                display: is_show ? "block" : "none"
-            } 
-            data-test="test" 
-            data-test2=test
-            data-test3=\(test)
-            onclick = function(e){console.log(e)} 
+        }</style></head><body><section class="container"><textarea id="source" class="editor" spellcheck="false"></textarea><div id="ast" class="editor"></div></section><script id="test" type="text/babel"><a></a><b></b>
+    let font_size=10,y=10,custom_value=10,selector_text=".test>*";
+    <style>
+        /*ss<a></a>*/
+        .test{
+            font-size:\(font_size.toFixed(1))px;
+        }
+        \(selector_text) {
+            position: relative;
+            display: \(is_show?"block":"none");
+            transform: translate(0, \(y)px);
+            animation: test ease-in steps(5) 6s 3s;
+            line-height: calc(100%-\(custom_value)px);
+        }
+    </style>
+    let test="test";
+    let is_show=false;
+    setTimeout(()=>{
+        is_show=true;
+        font_size+=Math.random()*10;
+        test="test1";
+        v3=0;
+    },1000)
+    let v1=1,v2=4;
+    let v3 =\(
+         v1 + v2
+    );//使用了绑定初始化，v3会随着 V1 或者 V2更改而更改
+    create_element(\(v3));//这个位置最终为 create_element 方法返回的元素
+    let a = <a 
+        style={
+            zIndex:10,
+            "font-size":font_size,
+            display: is_show ? "block" : "none"
+        } 
+        data-test="test" 
+        data-test2=test /*没有使用绑定描述，只使用初始值*/
+        data-test3=\(test) /*响应test更改*/
+        onclick = function(e){console.log(e)} 
         >
+            <input 
+                value=\(test) /*双向绑定*/
+            />
             s
-            \(a + b + <br />) 
-            \(show_more &&(<span>more</span>,<span>more</span>))
-            \(show_more &&<span>more</span>,<span>more</span>)
-            \{
-                a += b;
-                return a;
-            }
-            <b></b>
+            \(v1 + v2) 
+            <br/>
+            \(show_more &&<span>more</span>)
+            <br/>
+            \{show_more && (yield <span>more</span>,yield <span>more</span>)};
+            <b>
+                \{
+                    v1 += v2;//没有循环更改
+                    return v1>2*v2?v1:v2;
+                }
+                \{
+                    if(show_more){
+                        return <span>more</span>
+                    }
+                }
+            </b>
             a
-            <c>sdfds<!--sdf
+            <span>sdfds<!--sdf
             
-            dsf-->a</c>
+            dsf-->a</span>
         </a>;
-        
-        <b></b>;
-        b =\(a + c)
-
-        c =\{
-            return d;
-        };
-
+    function create_element(inner_html){
+        return inner_html&&<b>\(inner_html)</b>;
+    }
+    let test_list=[1,2,3];
+    <ul>
+    \{
+        for(let item of test_list){
+            yield <li>\(item)</li>
+        }
+    }
+    </ul>
         /[//]/;
 'dsad\
 ';
