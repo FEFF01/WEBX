@@ -7,16 +7,17 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
-
 module.exports = {
     mode: 'production',
     entry: {
-        ...(fs.readdirSync(path.resolve(__dirname, '../js/')).reduce((entry, file_name) => {
-            if (/\.(js|ts)$/.test(file_name) && fs.statSync(path.resolve(__dirname, '../js/' + file_name)).isFile()) {
-                entry[file_name.replace(/\.[^\.]+$/, "")] = path.resolve(__dirname, '../js/' + file_name)
-            }
-            return entry;
-        }, {})),
+        ...(
+            fs.readdirSync(path.resolve(__dirname, '../js/'))
+                .reduce((entry, file_name) => {
+                    if (/\.(js|ts)$/.test(file_name) && fs.statSync(path.resolve(__dirname, '../js/' + file_name)).isFile()) {
+                        entry[file_name.replace(/\.[^\.]+$/, "")] = path.resolve(__dirname, '../js/' + file_name)
+                    }
+                    return entry;
+                }, {})),
         //vendor: ['babel-polyfill']
     },
     devtool: 'source-map',
@@ -80,13 +81,14 @@ module.exports = {
                 hwps.push(new HtmlWebpackPlugin({
                     template: full_path_name,
                     filename: file_name,
-                    inject: false
+                    inject: false,
+                    minify: false
                 }));
             }
             return hwps;
         }, [])),
         new CopyWebpackPlugin(
-            ["css", "img"].map(dir => {
+            ["css", "img", "js/Ace"].map(dir => {
                 return {
                     from: path.resolve(__dirname, '../' + dir),
                     to: "./" + dir

@@ -5,8 +5,7 @@
   "main": "./dist/js/parser.js",
   "private": false,
   "license": "MIT",
-  "keywords": [
-  ],
+  "keywords": [],
   "repository": {
     "type": "git"
   },
@@ -37,6 +36,8 @@
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
-    "babel-runtime": "^6.26.0"
+    "babel-runtime": "^6.26.0",
+    "escodegen": "^2.0.0",
+    "input-listener": "^1.1.5"
   }
 }
