@@ -1,3 +1,6 @@
 [submodule "js/Dison"]
 	path = js/Dison
 	url = https://github.com/FEFF01/Dison.git
+[submodule "astexplorer"]
+	path = astexplorer
+	url = https://github.com/FEFF01/astexplorer.git
