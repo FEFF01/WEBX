@@ -7,17 +7,25 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const fs = require('fs');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
+function get_entry(dir) {
+    return fs.readdirSync(path.resolve(__dirname, dir)).reduce(
+        (entry, file_name) => {
+            if (
+                /\.(js|ts)$/.test(file_name) &&
+                fs.statSync(path.resolve(__dirname, dir + file_name)).isFile()
+            ) {
+                entry[dir + file_name.replace(/\.[^\.]+$/, "")] = path.resolve(__dirname, dir + file_name)
+            }
+            return entry;
+        },
+        {}
+    )
+}
+
 module.exports = {
     mode: 'production',
     entry: {
-        ...(
-            fs.readdirSync(path.resolve(__dirname, '../js/'))
-                .reduce((entry, file_name) => {
-                    if (/\.(js|ts)$/.test(file_name) && fs.statSync(path.resolve(__dirname, '../js/' + file_name)).isFile()) {
-                        entry[file_name.replace(/\.[^\.]+$/, "")] = path.resolve(__dirname, '../js/' + file_name)
-                    }
-                    return entry;
-                }, {})),
+        ...get_entry('../js/'),
         //vendor: ['babel-polyfill']
     },
     devtool: 'source-map',

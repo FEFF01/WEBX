@@ -82,14 +82,14 @@ function build() {
         `<script id="js_lib_1" src="${js_lib_1.src}"\></script\>
          <script id="js_lib_2" src="${js_lib_2.src}"\></script\>`+
         webx_demo.outerHTML+
-        `<script src="${
+        '<script src="'+
             URL.createObjectURL(
                 str2Blob(
                     webx(editor.getValue()),
-                    "text/javascript"
+                    `text/javascript`
                 )
-            )
-        }"\></script\>`+
+            )+
+        '"\></script\>'+
         '</body></html>'
         ,"text/html"
         )
