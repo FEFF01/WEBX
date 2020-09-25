@@ -14,7 +14,6 @@ and open the template in the editor.
 
 <body>
 <script id="webx_editor" type="text/babel">
-
 let editor_width , is_draging = false;
 
 document.body.appendChild(
@@ -80,17 +79,17 @@ function build() {
     return URL.createObjectURL(
         str2Blob(
         '<html><body>'+
-        `<`+`script id="js_lib_1" src="${js_lib_1.src}" `+'>'+'<'+'/script'+'>'+
-         '<'+`script id="js_lib_2" src="${js_lib_2.src}"`+'>'+'<'+'/script'+'>'+
+        `<script id="js_lib_1" src="${js_lib_1.src}"\></script\>
+         <script id="js_lib_2" src="${js_lib_2.src}"\></script\>`+
         webx_demo.outerHTML+
-        '<'+'script src="'+
+        '<script src="'+
             URL.createObjectURL(
                 str2Blob(
                     webx(editor.getValue()),
                     `text/javascript`
                 )
             )+
-        '">'+'<'+'/script'+'>'+
+        '"\></script\>'+
         '</body></html>'
         ,"text/html"
         )
@@ -171,7 +170,6 @@ document.head.appendChild(
         }
     </style>
 );
-
 </script>
 
     <script id="webx_demo" type="text/jsx">
