@@ -6,19 +6,18 @@ let parser = new Parser();
 
 export var scoped_runtime = parser.parse(//便于作用域标识符压缩
     `
-        var _webx = window._webx,{
-            throttle: _webx_throttle,
-            reactive: _webx_reactive,
-            call: _webx_call,
-            nextTick: _webx_next_tick,
-            assignAttribute: _webx_assign_attribute,
-            setAttribute: _webx_set_attribute,
-            appendChild: _webx_append_child,
-            createElement: _webx_create_element,
-            createTextNode: _webx_create_text_node,
-            appendResult: _webx_append_result,
-            appendTextNode: _webx_append_text_node
-        } = _webx;
+    var _webx = window._webx, 
+    _webx_throttle = _webx.throttle, 
+    _webx_reactive = _webx.reactive, 
+    _webx_call = _webx.call, 
+    _webx_next_tick = _webx.nextTick, 
+    _webx_assign_attribute = _webx.assignAttribute, 
+    _webx_set_attribute = _webx.setAttribute, 
+    _webx_append_child = _webx.appendChild, 
+    _webx_create_element = _webx.createElement, 
+    _webx_create_text_node = _webx.createTextNode, 
+    _webx_append_result = _webx.appendResult, 
+    _webx_append_text_node = _webx.appendTextNode;
     `
 ).body[0]
 
