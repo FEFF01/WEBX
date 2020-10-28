@@ -10,7 +10,7 @@ declare function RETURN_STATEMENT(argument: Node): {
 declare function LITERAL(value: any): {
     type: string;
     value: any;
-    raw: any;
+    raw: string;
 };
 declare function IDENTIFIER(name: string): {
     type: string;
@@ -119,7 +119,7 @@ declare const OPERATIONS: {
         type: string;
         expression: Node;
     };
-    CALL_IF_EXISTED(name: string): {
+    CALL_IF_EXISTED(...args: Array<Node>): {
         type: string;
         callee: Node;
         arguments: Node[];

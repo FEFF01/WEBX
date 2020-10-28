@@ -172,14 +172,12 @@ document.head.appendChild(
 );
 </script>
 
-    <script id="webx_demo" type="text/jsx">
+    <script id="webx_demo" type="text/babel">
         's';
         let is_show=true,test2;
         let global_value="global_value";
         let nth="1",y=0,text =`${\(nth)}  ${\(y)}`;
-        
         let shape_left=0,shape_top=0;
-          
         let test_checked=false;
         for(let i=0;i<2;i++){
             let test2="",shape_color="F0F";
@@ -187,7 +185,6 @@ document.head.appendChild(
             let value="scope value";
             let shape_style=\(`background-color:#${ shape_color }; width: ${ 30 + (Math.random() * 100) | 0 }px`);
             let a=<a class="test" title=\("title"+text) data-text=text onclick=console.log >
-                
                 <label style="display:block;">
                     checkbox:
                     <input type="checkbox" checked=\(test_checked) />

@@ -19,7 +19,7 @@ function LITERAL(value: any) {
     return {
         type: "Literal",
         value: value,
-        raw: typeof value === "string" ? `"${value}"` : value.toString()
+        raw: `"${value}"`/*typeof value === "string" ? `"${value}"` : value.toString()*/
     }
 }
 function IDENTIFIER(name: string) {
@@ -100,7 +100,6 @@ function ASSIGNMENT_STATEMENT(left: Node, right: Node) {
         ASSIGNMENT_EXPRESSION(left, right)
     )
 }
-
 const OPERATIONS = {
     SEQUENCE_EXPRESSION,
     RETURN_STATEMENT,
@@ -187,10 +186,11 @@ const OPERATIONS = {
             )
         )
     },
-    CALL_IF_EXISTED(name: string) {
+    CALL_IF_EXISTED(...args: Array<Node>) {
         return CALL_EXPRESSION(
             IDENTIFIER("_webx_call"),
-            IDENTIFIER(name)
+            ...args
+            //IDENTIFIER(name)
 
         )
     },

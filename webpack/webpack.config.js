@@ -96,7 +96,7 @@ module.exports = {
             return hwps;
         }, [])),
         new CopyWebpackPlugin(
-            ["css", "img", "js/Ace"].map(dir => {
+            [/*"css", "img",*/ "js/Ace"].map(dir => {
                 return {
                     from: path.resolve(__dirname, '../' + dir),
                     to: "./" + dir

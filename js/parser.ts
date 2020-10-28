@@ -291,7 +291,6 @@ let css_rules = {
                         type: "CSSRule",
                         children
                     };
-                    console.log(css_rule);
                     css_rules.push(
                         css_rule
                     );

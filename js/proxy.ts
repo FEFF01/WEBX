@@ -18,21 +18,21 @@ import ast_preprocessor from './preprocessor'
 
 
 let BASE_ID: number, declaring_variables: Array<Node>;
-let tasks: Array<() => any>, tasks_after: Array<() => any>;
+let tasks: Array<() => any>;
 export default function (ast: Node) {
     BASE_ID = 1;
     declaring_variables = [];
     tasks = [];
-    tasks_after = [];
     console.time("_ProxyNode");
 
-    let root_proxy_node: any = _ProxyNode(
+    let root_proxy_node: any = new ProxyNode(
         ast_preprocessor(ast),
-        false,
+        null,
         ""
     );
-    tasks.forEach(task => task());
-    tasks_after.forEach(task => task());
+    for (let task of tasks) {
+        task();
+    }
 
     for (let scope of declaring_variables) {
         let scope_node = scope._node;
@@ -75,93 +75,87 @@ export default function (ast: Node) {
     return proxy_ast;
 }
 
-function _ProxyNode(target: any, parent: any, key: string) {
-    let proxy_node = new class ProxyNode {
-        _context: any = {};
-        _prevent_bubbing = false;
-        constructor(node: Node, private _parent: ProxyNode, private _key: string) {
-            this.__proto__.__proto__ = node;
-            let context = this._context;
-            context.__proto__ = _parent._context;
-            let observer = node.observer;
-            if (observer !== undefined) {
-                if (observer) {
-                    context.binding_node = this;
-                    context.observer = observer;
-                    add_source_if_shallow_node(this, node, context.bindings = {});
-                    tasks_after.push(set_reactive.bind(this, true));
-                } else {
-                    context.binding_node = null;
-                    context.observer = null;
-                    context.bindings = null;
-                }
-                delete node.observer;
-            }
-            let type = node.type;
-            if (type) {
-                let capture = CAPTURES[type];
-                let wrap_node = capture && capture.call(this, node);
-                if (!wrap_node) {
-                    this._capture(node);
-                } else {
-                    _parent && (_parent._node[_key] = wrap_node);
-                    return _ProxyNode(wrap_node, _parent, _key);
-                }
 
+interface ProxyNode {
+    [propName: string]: any
+}
+
+class ProxyNode {
+    _context: any = {};
+    _prevent_bubbing = false;
+    constructor(public _node: Node, public _parent: ProxyNode, public _key: string) {
+        let context = this._context;
+        _parent && (context.__proto__ = _parent._context);
+        let observer = _node.observer;
+        if (observer !== undefined) {
+            if (observer) {
+                context.binding_node = this;
+                context.observer = observer;
+                add_source_if_shallow_node(this, _node, context.bindings = {});
+                tasks.push(set_reactive.bind(this, true));
+            } else {
+                context.binding_node = null;
+                context.observer = null;
+                context.bindings = null;
             }
+            delete _node.observer;
         }
-        _queryParent(pattern: (node: Node) => boolean) {
-            let parent: ProxyNode = this;
-            while (!pattern(parent)) {
-                parent = parent._parent
+        let type = _node.type;
+        if (type) {
+            let capture = CAPTURES[type];
+            let wrap_node = capture && capture.call(this, _node);
+            if (wrap_node) {
+                _parent && (_parent._node[_key] = wrap_node);
+                return new ProxyNode(wrap_node, _parent, _key);
             }
-            return parent;
+            this._capture(_node);
         }
-        get _parent_node() {
-            return this._parent._node;
-        }
-        get _node() {
-            return this.__proto__.__proto__;
-        }
-        _capture(node: Node) {
-            let type = node.type;
-            let context = this._context;
-            let bindings = context.bindings;
-            if (bindings) {
-                let capture = CAPTURES_IF_BINDING[type];
-                capture && capture.call(this, node, bindings);
-                let keys = BINDING_KEYS[type];
-                keys && keys.forEach(
-                    (key: string) => add_source_if_shallow_node(this, node[key], bindings)
-                );
-            }
-            let keys = MODIFIED_KEYS[type];
-            keys && keys.forEach(
-                (key: string) => add_source_if_shallow_node(this, node[key], context.updates)
-            );
-        }
-    }(target, parent, key);
-    if (proxy_node._node === target) {
-        for (let key in target) {
-            let value = target[key];
+        for (let key in _node) {
+            let value = _node[key];
             if (
-                key === "range" || key === "loc" ||
-                !value || typeof value !== "object" ||
-                ~["Identifier", "Literal", "ThisExpression", "Super"].indexOf(value.type)
+                key !== "range" && key !== "loc" &&
+                value && typeof value === "object" &&
+                [
+                    "Identifier", "Literal", "ThisExpression", "Super"
+                ].indexOf(value.type) < 0
             ) {
-                continue;
+                value = new ProxyNode(value, this, key);
             }
-            let _node = _ProxyNode(target[key], proxy_node, key);
-            if (_node) {
-                proxy_node[key] = _node;
-            }
+            this[key] = value;
         }
     }
-    return proxy_node;
+    _queryParent(pattern: (node: ProxyNode) => boolean) {
+        let parent: ProxyNode = this;
+        while (!pattern(parent)) {
+            parent = parent._parent
+        }
+        return parent;
+    }
+    get _parent_node() {
+        return this._parent._node;
+    }
+    _capture(node: Node) {
+        let type = node.type;
+        let context = this._context;
+        let bindings = context.bindings;
+        if (bindings) {
+            let capture = CAPTURES_IF_BINDING[type];
+            capture && capture.call(this, node, bindings);
+            let keys = BINDING_KEYS[type];
+            keys && keys.forEach(
+                (key: string) => add_source_if_shallow_node(this, node[key], bindings)
+            );
+        }
+        let keys = MODIFIED_KEYS[type];
+        keys && keys.forEach(
+            (key: string) => add_source_if_shallow_node(this, node[key], context.updates)
+        );
+    }
 }
 
 
-function init_logger(proxy_node: Node) {
+
+function init_logger(proxy_node: ProxyNode) {
     let context = proxy_node._context;
     context.updates = {};
     context.namespace = {};
@@ -197,7 +191,7 @@ function unique_id() {
     return "_webx_" + (BASE_ID++).toString(36);
 }
 
-function new_variable_declare(scpoe_node: Node, id: string, init: Node = null) {
+function new_variable_declare(scpoe_node: ProxyNode, id: string, init: Node = null) {
     let context = scpoe_node._context;
     if (declaring_variables.indexOf(scpoe_node) < 0) {
         declaring_variables.push(scpoe_node);
@@ -211,19 +205,28 @@ function new_variable_declare(scpoe_node: Node, id: string, init: Node = null) {
     context.new_variables.push([id, init]);
 }
 
+function set_reactive_node(source_menbers, target_menbers) {
 
-function reactive(top_scope: Node, observer: string, id: string, members: Node | any[]) {
+}
+
+
+function reactive(top_scope: ProxyNode, observer: string, id: string, members: Node | any[]) {
+    console.log("arguments", arguments, members);
+
+
     for (let scope of top_scope._context.scopes) {
         if (
-            scope._context.namespace[id] !== top_scope ||
-            scope._prevent_bubbing
+            scope._prevent_bubbing ||
+            scope._context.namespace[id] !== top_scope
         ) {
             continue;
         }
         let targets = scope._context.updates[id];
         if (targets) {
+            console.log("targets", targets);
             for (let i = 0; i < targets.length; i += 2) {
                 let statement = targets[i]._queryParent(isStatementListItem);
+                //let reactive_map = statement.reactive_map || (statement.reactive_map = {});
                 if (statement.reactives) {
                     if (statement.reactives.indexOf(observer) < 0) {
                         statement.reactives.push(observer);
@@ -248,7 +251,10 @@ function reactive(top_scope: Node, observer: string, id: string, members: Node |
                 statement_list.splice(
                     index + 1, 0,
                     OPERATIONS.EXPRESSION_STATEMENT(
-                        statement.reactive_node = OPERATIONS.CALL_IF_EXISTED(observer)
+                        statement.reactive_node = OPERATIONS.CALL_IF_EXISTED(
+                            OPERATIONS.LITERAL(null),
+                            OPERATIONS.IDENTIFIER(observer)
+                        )
                     )
                 )
             }
@@ -258,14 +264,12 @@ function reactive(top_scope: Node, observer: string, id: string, members: Node |
 
 function set_reactive(need_new_variiable: boolean) {
     let context = this._context;
-    let bindings = context.bindings;
-    let observer = context.observer;
-    let namespace = context.namespace;
-    let root_scope: Node, root_level = NaN;
+    let { bindings, observer, namespace } = context;
+    let root_scope: ProxyNode, root_level = NaN;
     this._prevent_bubbing = true;
     for (let id in bindings) {
         let refered_list = bindings[id];
-        let top_scope: Node = namespace[id];
+        let top_scope: ProxyNode = namespace[id];
         if (top_scope) {
             if (!(root_level <= top_scope._context.wrapped_level)) {
                 root_scope = top_scope;
@@ -296,7 +300,7 @@ function set_wrapper() {
     if (!has_observer) {
         let observer = context.observer = unique_id();
         let statement_list = statement._parent_node;
-        if (!(statement_list instanceof Array)) {
+        if (!(statement_list instanceof Array)) {//for
             debugger;
         }
         let statement_node = statement._node;
@@ -314,18 +318,9 @@ function set_wrapper() {
         );
     }
     this._parent_node[this._key] = this._node.expression;
-    tasks_after.push(set_reactive.bind(this, !has_observer))
+    tasks.push(set_reactive.bind(this, !has_observer))
 }
 
-
-function next_scoped_unique_id(proxy_node: any) {
-    let context = proxy_node._context;
-    let scope = context.wrap_node || context.scope_node;
-    context = scope._context;
-    let id = "_webx_t" + context.wrapped_level + "_" + (context.base_id++).toString(36);
-    new_variable_declare(scope, id);
-    return id;
-}
 
 function create_element(node: Node) {
     let tag_name = node.openingTag.name;
@@ -333,7 +328,12 @@ function create_element(node: Node) {
     if (this._context.binding_node) {
         scope_node = this._context.binding_node._parent;
     }
-    let id = next_scoped_unique_id(scope_node);
+    let context = scope_node._context;
+    scope_node = context.wrap_node || context.scope_node;
+    context = scope_node._context;
+    let id = "_webx_t" + context.wrapped_level + "_" + (context.base_id++).toString(36);
+    new_variable_declare(scope_node, id);
+
     let element = OPERATIONS.CREATE_ELEMENT(id, tag_name);
     let content: Array<Node> = element.callee.body.body;
     let return_statement = content.pop();
@@ -341,7 +341,11 @@ function create_element(node: Node) {
         let attribute_name = attribute.name.name;
         let attribute_value = attribute.value || OPERATIONS.LITERAL("");
         content.push(
-            (/^(on[^_-]*)|(value|id|checked)$/.test(attribute_name) ? OPERATIONS.ASSIGN_ATTRIBUTE : OPERATIONS.SET_ATTRIBUTE)(
+            (
+                /^(on[^_-]*)|(value|id|checked)$/.test(attribute_name) ?
+                    OPERATIONS.ASSIGN_ATTRIBUTE :
+                    OPERATIONS.SET_ATTRIBUTE
+            )(
                 id,
                 attribute_name,
                 attribute_value
@@ -439,7 +443,7 @@ const CAPTURES = {
     VariableDeclarator(node: Node) {
         let variable_declaration = this._parent._parent;
         let context = this._context;
-        let scope_node: Node = variable_declaration.kind === "var"
+        let scope_node: ProxyNode = variable_declaration.kind === "var"
             ? context.scope_node
             : (context.wrap_node || context.scope_node)
         let namespace: any = scope_node._context.namespace;

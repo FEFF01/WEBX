@@ -54,9 +54,10 @@ export default parser.parse(
             return callback();
         }
         function call() {
-            for (var i = 0; i < arguments.length; i++) {
+            let members = arguments[0];
+            for (var i = 1; i < arguments.length; i++) {
                 for (var callback of arguments[i]) {
-                    callback();
+                    callback(members);
                 }
             }
         }
@@ -73,11 +74,11 @@ export default parser.parse(
             el.appendChild(child);
         }
         function createElement(tagName) {
-            console.log("_webx_create_element:", { tagName });
+            //console.log("_webx_create_element:", { tagName });
             return document.createElement(tagName);
         }
         function createTextNode(data) {
-            console.log("_webx_create_text_node:", { data });
+            //console.log("_webx_create_text_node:", { data });
             return document.createTextNode(data);
         }
         function appendResult(el, getter) {

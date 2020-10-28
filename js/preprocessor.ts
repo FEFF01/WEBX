@@ -163,6 +163,3 @@ function preprocessor(node: Node) {
     }
     return node;
 }
-function get_unique_id() {
-    return "_webx_p_" + (BASE_ID++).toString(36);
-}
