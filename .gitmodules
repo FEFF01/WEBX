@@ -1,0 +1,4 @@
+[submodule "js/Dison"]
+	path = js/Dison
+	url = https://github.com/FEFF01/Dison.git
+	branch = master

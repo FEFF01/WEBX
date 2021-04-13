@@ -1,0 +1,36 @@
+import Tokenizer from "./tokenizer";
+import { MatchedRecords, Token, Node, Context, Validate, MatchTree } from "./interfaces";
+declare type Extreme = MatchedRecords;
+declare type Longest = MatchedRecords;
+export default class extends Tokenizer {
+    SYNTAX_TREE: MatchTree;
+    EXPRESSION_TREE: MatchTree;
+    TYPE_ALIAS: Record<string, string[]>;
+    padding_token: Token;
+    error_logs: Array<any>;
+    save_comments: boolean;
+    match_tree_stack: Array<MatchTree>;
+    context_stack: Array<Context>;
+    isExpression: (token: Token) => boolean;
+    isStatement: (token: Token) => boolean;
+    isStatementListItem: (token: Token) => boolean;
+    isPrimaryExprStart(): boolean;
+    err(...args: any): void;
+    constructor();
+    parse(input: string): any;
+    parseModule(input: string): any;
+    parseScript(input: string): any;
+    parseExpression(context: Context): Node;
+    parseNode(match_tree: MatchTree, context: Context, test: (node: Node) => boolean): Node;
+    parseRangeAsNode(match_tree: MatchTree, context: Context, left: number, lexcal_terminator: Validate, test: (node: Node) => boolean): Node;
+    parseRangeAsExpression(context: Context, left: number, lexcal_terminator: Validate): Node;
+    parseRangeAsBlock(context: Context, left: number, lexcal_terminator?: Validate): Token;
+    private _parse;
+    parseCustom(root: MatchTree, context: Context, begin?: number, test?: Function): Token;
+    parseRange(match_tree: MatchTree, context: Context, left: number, lexcal_terminator: Validate, test?: (node: Node) => boolean): Token;
+    walk(root: MatchTree, context: Context, start: number, backflow_tape: Array<number>, minimum: number): Longest;
+    createNode(context: Context): any;
+    getToken(index: number): Token;
+    finallize(context: Context, record: Extreme): number;
+}
+export {};

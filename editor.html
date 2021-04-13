@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>webx</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    
+<script id="webx_demo" type="text/babel">
+
+let support_list=[
+    ["chrome",{"version_added":"49","release_date":"2016-03-02"}],
+    [0],
+    ["chrome_android",{"version_added":"49","release_date":"2016-03-09"}],
+    ["edge",{"version_added":"12","release_date":"2015-07-28"}],
+    ["firefox",{"version_added":"18","release_date":"2013-01-08"}],
+    ["firefox_android",{"version_added":"18","release_date":"2013-01-08"}],
+    ["ie",{"version_added":false}],
+    ["nodejs",{"version_added":"6.0.0","release_date":"2016-04-26"}],
+    ["opera",{"version_added":"36","release_date":"2016-03-15"}],
+    ["opera_android",{"version_added":"36","release_date":"2016-03-31"}],
+    ["safari",{"version_added":"10","release_date":"2016-09-20"}],
+    ["safari_ios",{"version_added":"10","release_date":"2016-09-13"}],
+    ["samsunginternet_android",{"version_added":"5.0","release_date":"2016-12-15"}],
+    ["webview_android",{"version_added":"49","release_date":"2016-03-09"}]
+];
+
+let color="#333";
+
+document.body.appendChild(
+    <div>
+
+        <button
+            onclick = function updateColor() {
+                color="#" + Math.random().toString(16).slice(2,8);
+            }
+        >update color</button>
+
+        <AddSupport/>
+
+        <ul class="support-list">
+            @:for(let index in support_list){/*support_list->([name,data],index) */
+                let [name,data]=support_list[index];
+                <Draggable index=@(index) list=@(support_list)>
+                    @:if(name===0)
+                        <SupportTable/> 
+                    else <div>
+                        <button 
+                            style="position:absolute;right:0;top:0;"
+                            onclick = ()=> {
+                                support_list.splice(index,1);
+                            }
+                        >X</button>
+                        index : @{index},
+                        name : @{name}
+                        <br/>
+                        data : <val>@{JSON.stringify(data)}</val>
+                        <SupportInfo data=@(data)/>
+                    </div>
+                </Draggable>
+            }
+        </ul>
+        <ul>
+            @{
+                let a=["a","b","c"];
+                for(let index in a) {
+                    <li> @{index+":"+a[index]} <input value=@(a[index])/></li>
+                }
+            }
+        </ul>
+    </div>
+)
+
+
+function AddSupport(){
+    return [    //元素数组可以不用逗号连接，为了表达清晰使用逗号也行
+        <br/>,<br/>,
+        <input 
+            style="margin-left: 10px;" 
+            value=@(name) 
+            placeholder="name"
+        />,
+        <button onclick= function() {
+            support_list.unshift([name,{}]);
+            name="";
+        }>add item</button>
+    ]
+}
+function SupportInfo({data}){
+    return <div style="margin-top:10px;">
+        @:for(let key in data){
+            <label>
+                <span>((key))</span> :
+                <input value = @{data[key]} placeholder="value" />
+                <button 
+                    onclick=function(){
+                        delete data[key];
+                    }
+                >X</button>
+            </label>
+            <br/>
+        }
+        @{
+            let key="",value="";
+            <input value=@(key) style="margin-top:6px;" placeholder="key"/>
+            <input value=@(value) placeholder="value"/>
+            <button 
+                onclick=function() {
+                    data[key]||(data[key]=value);
+                    key="";
+                    value="";
+                }
+            >add record</button>
+        }
+    </div>
+}
+
+
+function Draggable({index,list,children}){
+    let is_drag=false;
+    let ox=0,oy=0;
+    let easing=true;
+
+    let container = <li
+            class=@(is_drag?"dragging":"")
+            style=@(`
+                transform: translate(${ox}px, ${oy}px);
+                ${easing&&!is_drag?"transition:all 0.3s;":""}
+            `)
+        >
+            @:children;
+        </li>;
+
+    let _index;
+    let top;
+    let timeout;
+    // 置换响应和处理缓动
+    @autorun{
+        clearTimeout(timeout);
+        if( _index!==index){
+            if(is_drag || _index===undefined){
+                timeout=setTimeout(function(){
+                    top=container.getBoundingClientRect().y+window.scrollY;
+                });
+            }else{
+                easing=false;
+                oy=0;
+                let _top=container.getBoundingClientRect().y+window.scrollY;
+                oy=top-_top;
+                timeout=setTimeout(@action function enter_to(){
+                    easing=true;
+                    oy=0;
+                },6)
+                top=_top;
+            }
+            _index=index;
+        }
+    }
+    // 拖拽监听及置换处理
+    new InputListener(
+        container,
+        {
+            dragStart(e){
+                let tag_name=e.target.tagName;
+                if(tag_name==="INPUT"||tag_name==="BUTTON"){
+                    return true;
+                }
+                e.preventDefault();
+            },
+            dragMove:@action function move(e,[x,y]){
+                if(is_drag || x*x+y*y>20){
+                    ox+=x;
+                    oy+=y;
+                    is_drag=true;
+                    let prevsib=container.previousElementSibling;
+                    let nextsib=container.nextElementSibling;
+                                
+                    if(index<list.length-1 && oy>nextsib.offsetHeight/2){
+                        let _index=Number(index);
+                        list.splice(
+                            _index,
+                            0,
+                            list.splice(_index+1,1)[0]
+                        );
+                        oy-=nextsib.offsetHeight;
+
+                    }else if(index>0 && oy<-prevsib.offsetHeight/2){
+                        let _index=Number(index);
+                        list.splice(
+                            _index,
+                            0,
+                            list.splice(_index-1,1)[0]
+                        );
+                        oy+=prevsib.offsetHeight;
+                    }
+                                
+                }else{
+                    return true;
+                }
+            },
+            dragEnd:function(e){
+                is_drag=false;
+                ox=oy=0;
+            }
+        }
+    );
+    return container;
+
+}
+
+function SupportTable(){
+
+    let focus_item,focus_index;
+
+    @autorun{
+        if(
+            !focus_item 
+            || (focus_index=support_list.indexOf(focus_item)) < 0
+        ){
+            focus_item=support_list[0];
+            focus_index=0;
+        }
+    }
+    
+    return <li class="support-table">
+        @{
+        <aside>
+            @{
+                for(let item of slice(support_list,6)){
+                    <button 
+                        class=@(focus_item===item?"activate":"")
+                        onclick=function(){
+                            focus_item=item;
+                        }
+                    >
+                        @(item[0])
+                    </button>
+                }
+            }
+        </aside>
+        <main>
+            @{
+                var [key,data]=focus_item;
+                <br/>
+                @:focus_index+" - "+ key + " :";   
+                <br/>
+                if(data){
+                    <SupportInfo data=@(data)/>
+                }else{
+                    <div>Hello World!</div>
+                }
+            }
+        </main>
+        }
+    </li>
+    
+    function slice(target,max=6){
+        let list = [];
+        for(let item of target){
+            if(item[0]!==0){
+                list.push(item);
+                if(list.length>=max){
+                    break;
+                }
+            }
+        }
+        return list;
+    }
+}
+
+document.head.appendChild(
+    <style>
+        button{
+            color:@{color};
+        }
+        body{
+            padding-bottom: 4rem;
+            color:((color));
+            box-shadow: 0 0 2px @(color) inset;
+            overflow-x:hidden;
+        }
+        .support-list{
+            padding:10px 4px;
+        }
+        .support-list>*{
+            position:relative;
+            display:block;
+            cursor:pointer;
+            box-shadow:0 0 2px #999;
+            padding:6px 30px 20px 6px;
+            background-color:white;
+        }
+        .support-list .dragging{
+            z-index:100;
+            cursor:move;
+
+        }
+        .support-table{
+            display:flex;
+            border-bottom:2px solid #999;
+            padding-bottom:4px;
+        }
+        .support-table>main *{
+            margin-top:4px;
+        }
+        .support-table>aside{
+            overflow:hidden;
+            overflow-y:auto;
+            border-right:2px solid #aaa;
+            margin-right:10px;
+            padding: 0 6px 0 0;
+        }
+        .support-table>aside .activate{
+            color:white;
+            background-color:#ccc;
+        }
+        .support-table>aside>*{
+            cursor:pointer;
+            display:block;
+            width:100%;
+            border:none;
+            box-shadow:0 1px 1px #aaa;
+            line-height:2rem;
+            height:2rem;
+            margin:2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+);
+support_list->(value,key,index,target){
+    
+}
+window.onclick=function(e){
+    if(!e.target.className){
+        e.target.className=Math.random().toString(36).slice(2,6);
+    }
+}
+document.body.appendChild(<div>
+@{
+    let name="";
+    /*for(var [a,b=2] of [[2],[3,1],[6]]){
+        <div>@{a}@{b}</div>
+    }*/
+    switch(name){
+        case "":
+            <div>ssss</div>
+        default:
+            <div>eeee</div>
+         break;
+    }
+}
+</div>)
+
+</script>
+
+    <script id="webx_editor" type="text/babel">
+        let editor_width , is_draging = false;
+        
+        document.body.appendChild(
+            <session class="container">
+                <main  class="main-panel" >
+                    <div id="editor">@{
+                        /*window.top===window   //展示自洽递归的编辑器
+                            ?window.webx_editor.innerHTML
+                            :webx_demo.innerHTML*/
+                        webx_demo.innerHTML
+                    }</div>
+                    @{resizeable_line()}
+                    <fotter class="fotter-bar">
+                        <button 
+                            class = "btn-build"
+                            onclick = function output(e){
+                                viewport_src=build();
+                            } 
+                        >RUN >></button>
+                        <a href=@(viewport_src) target="_blank">@(viewport_src)</a>
+                    </fotter>
+                </main>
+                <aside class="side-panel">
+                    <div class="content">
+                        <iframe src=@{viewport_src} class="viewport"/>
+                    </div>
+                </aside>
+            </session>
+        )
+        
+        Object.defineProperty(window,"editorWidth",{//测试导出方法
+            get(){
+                return editor.container.offsetWidth;
+            },
+            set(width){
+                editor_width=width;
+            }
+        })
+        function resizeable_line(){
+            let border_color;
+            return (new InputListener(
+                <ins 
+                    class="split-line"
+                    style=@{border_color?`border-color:${border_color};`:""}
+                ></ins>, 
+                {
+                    dragStart(e) {
+                        e.preventDefault();
+                        is_draging = true;
+                        border_color="sandybrown";
+                        editor_width=window.editorWidth;
+                    },
+                    dragEnd() {
+                        is_draging = false;
+                        border_color=undefined;
+                    },
+                    dragMove(e, v) {
+                        editor_width +=  v[0];
+                    }
+                }
+            )).target;
+        }
+        
+        let editor = new ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/jsx");
+
+        var viewport_src = build();
+        
+        function build() {
+            
+            return URL.createObjectURL(
+                str2Blob(
+                '<html><body>'+
+                `<script id="js_lib_1" src="${js_lib_1.src}"\></script\>
+                 <script id="js_lib_2" src="${js_lib_2.src}"\></script\>`+
+                webx_demo.outerHTML+
+                '<script src="'+
+                    URL.createObjectURL(
+                        str2Blob(
+                            webx(editor.getValue()),
+                            `text/javascript`
+                        )
+                    )+
+                '"\></script\>'+
+                '</body></html>'
+                ,"text/html"
+                )
+            )
+        }
+        function str2Blob (bstr, type) {
+            var l = bstr.length,
+            u8arr = new Uint8Array(l);
+            while (l--) {
+                u8arr[l] = bstr.charCodeAt(l);
+            }
+            return new Blob([u8arr], {
+                type: type || "mime"
+            });
+        }
+        document.head.appendChild(
+            <style type="text/css">
+                .container{
+                    position:absolute;
+                    display:table;
+                    width:100%;
+                    height:100%;
+                    left:0;
+                    top:0;
+                }
+                .container>*{
+                    position:relative;
+                    display:table-cell;
+        
+                }
+                .main-panel{
+                    width:@{isNaN(editor_width)?"50%":(editor_width+"px")};
+                    height:100%;
+                }
+                .side-panel .content{
+                    position:absolute;
+                    top:0;
+                    bottom:0;
+                    width:100%;
+                    /*border-top:2px solid gray;*/
+                    pointer-events:@{is_draging?"none":"auto"};
+                }
+                .viewport{
+                    width:100%;
+                    height:100%;
+                    border:none;
+                }
+                .fotter-bar{
+                    position:absolute;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    height:3rem;
+                    bottom:0;
+                    width:100%;
+                    background-color:white;
+                    z-index:10;
+                    overflow:hidden;
+                    font-size:12px;
+                    font-weight:bold;
+                }
+                .fotter-bar>*{
+                    line-height:2rem;
+                    margin-left:1rem;
+                    overflow:hidden;
+                    text-overflow:ellipsis;
+                    white-space:nowrap;
+                }
+                .btn-build{
+                    outline: none;
+                    flex-shrink: 0;
+                }
+                
+                #editor{
+                    position:absolute;
+                    width:100%;
+                    bottom:3rem;
+                    top:0;
+                    font-size:16px;
+                    box-sizing:border-box;
+                    border:none;
+                }
+                .split-line{
+                    position:absolute;
+                    top:0;
+                    bottom:0;
+                    right:0;
+                    width:0;
+                    z-index:10;
+                    border-right: 3px dashed#aaa;
+                    cursor:e-resize;
+                    background-color: white;
+                    transition: border-color 0.1s;
+                }
+                .split-line:hover{
+                    border-color:skyblue;
+                }
+            </style>
+        );
+        </script>
+        <script id="js_lib_1" src="./js/Ace/ace.js" type="text/javascript"></script>
+        <script id="js_lib_2" src="./js/editor.js" type="text/javascript"></script>
+            
+        <script>
+            eval(webx(webx_editor.innerHTML))
+        </script>
+</body>
+
+</html>

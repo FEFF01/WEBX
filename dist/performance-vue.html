@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>performance test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <script>
+        let testcase="vue";//"webx" "vue";
+    </script>
+    <script src="./js/performance.js" type="text/javascript"></script>
+
+    <script>
+        let count=0;
+        let base_id=0;
+        const list = gen_list(20000);
+        function gen_list(size){
+            let res=[];
+            count+=Math.max(size,0);
+            for (let i = 0; i < size; i++) {
+                res.push(
+                    {
+                        id:++base_id,
+                        color:"#"+Math.random().toString(16).slice(2,5),
+                        text: Math.random().toString(36).slice(2, 10),
+                        children:gen_list(Math.pow(size,0.22)-7|0)
+                    }
+                );
+            }
+            return res;
+        }
+        console.log("total nodes : " + count);
+        
+    </script>
+
+
+    <div id="vue_demo"></div>
+    <script>
+        Vue.component(
+            "Tree",
+            {
+                props: ['data'],
+                methods:{
+                    update(i){
+                        this.data[i].text=Math.random().toString(36);
+                        this.data[i].color="#"+Math.random().toString(16).slice(2,5);
+                    },
+                    attach(i){
+                        this.data[i].children.push(gen_list(1)[0]);
+                    }
+                },
+                beforeUpdate(){
+                    this.data===list&&console.time("vue update");
+                },
+                updated(){
+                    this.data===list&&console.timeEnd("vue update");
+                },
+                template:`
+                <ul>
+                    <li v-for="(item,i) in data" :key="item.id">
+                        <!-- 
+                            vue 如果放弃这条渲染二级节点以下的的变更响应将会快很多
+                            （二级短列表的变更不会导致上级列表整个生成 vdom 做整个对比）
+                            不过顶级列表项的变更同样会导致整个 vdom 生成和对比
+                        -->
+                        <var>{{JSON.stringify(item)}}</var>
+                        <br/>
+                        <button :style={color:item.color} @click="update(i)">{{item.text}}</button>
+                        <button @click="attach(i)">+</button>
+                        <Tree v-if="item.children.length" :data="item.children"/>
+                    </li>
+                </ul>`,
+                data(){
+                    return {};
+                }
+
+            }
+        );
+        if(testcase==="vue"){
+        new Vue({
+            el:'#vue_demo',
+            template:`
+            <div>
+                <button @click="data.unshift(gen_list(1)[0])">+</button>
+                <Tree :data="data"/>
+            </div>
+            `,
+            created(){
+                console.time("vue_demo");
+            },
+            mounted(){
+                console.timeEnd("vue_demo");
+            },
+            data(){
+                return {
+                    gen_list:gen_list,
+                    data:list
+                }
+            }
+        })
+        }
+    </script>
+
+    <script id="webx_demo" type="text/babel">
+        <span></span>
+        let data = list;
+        console.time("webx_demo");
+        /**
+         * 这个往一级列表加入一项的操作不管是在 vue 还是 webx ，都会导致产生对整个列表的对比
+         * 
+         */
+        document.body.appendChild(
+            <button onclick=function (){
+                console.time("webx update");
+                data.unshift(gen_list(1)[0]);
+                console.timeEnd("webx update");
+                }>+</button>
+            );
+        
+        document.body.appendChild(<Tree data=@(data)/>);
+
+        function Tree({data}){
+            return <ul>
+                @:for(let item of data){
+                    <li>
+                        <var>@{JSON.stringify(item)}</var>
+                        <br/>
+                        <button 
+                            style=@(`color:${item.color};`)
+                            onclick=function(e){ 
+                                console.time("webx update");
+                                item.color="#"+Math.random().toString(16).slice(2,5);
+                                item.text=Math.random().toString(36);
+                                console.timeEnd("webx update");
+                            }
+                        >@{item.text}</button>
+                        <button
+                            onclick=function(){ 
+                                console.time("webx update");
+                                item.children.push(gen_list(1)[0]);
+                                console.timeEnd("webx update");
+                            }
+                        >+</button>
+
+                        @:if(item.children.length){
+                            <Tree data=@(item.children)/>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+        console.timeEnd("webx_demo");
+    </script>
+    <script>
+        if(testcase==="webx"){
+            eval(webx(webx_demo.innerText));
+        }
+    </script>
+</body>
+
+</html>

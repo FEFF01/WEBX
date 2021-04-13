@@ -1,0 +1,11 @@
+import { Node, MatchTree } from '../../Dison/js/interfaces';
+import './script-extends';
+declare let EXPRESSION_TREE: MatchTree;
+declare const SYNTAX_TREE: Record<string, any>;
+declare function isExpression(node: Node): any;
+declare function isDeclaration(node: Node): any;
+declare function isStatement(node: Node): any;
+declare function isStatementListItem(node: Node): any;
+declare function isModuleItem(node: Node): any;
+export { isExpression, isStatement, isStatementListItem, isDeclaration, isModuleItem, SYNTAX_TREE, EXPRESSION_TREE, };
+export default function (input: string): any;

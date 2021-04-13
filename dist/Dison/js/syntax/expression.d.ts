@@ -1,0 +1,11 @@
+import { Node, Token, Context } from '../interfaces';
+import { Operator } from './head';
+import { parseArrayPattern, parseObjectPattern } from './pattern';
+declare const PARAMS_PATTERN: Operator;
+declare const FUNCTION_BODY_PATTERN: Operator;
+declare const PrimaryExpressions: Record<string, any>;
+declare const Expressions: Record<string, any>;
+declare const ArrayElements: any;
+export { ArrayElements, PARAMS_PATTERN, FUNCTION_BODY_PATTERN, PrimaryExpressions, Expressions, parseArrayPattern, parseObjectPattern, parse_params };
+export default Expressions;
+declare function parse_params(context: Context, tokens: Array<Token>): Node[];
