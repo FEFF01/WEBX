@@ -4090,15 +4090,6 @@ nth-check@^1.0.2:
   dependencies:
     boolbase "~1.0.0"
 
-obb@0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/obb/-/obb-0.5.1.tgz#136e2fa6632981318447258f789dd89be60d7f65"
-  integrity sha512-cFNTcUzBOZkiy019QbiR8pUrekqOkautbB1FrcOpGQtFcL5ym5K8jxcVmz367Uvy/RNodmtWEH/NYImwofqa1w==
-  dependencies:
-    babel-polyfill "^6.26.0"
-    babel-runtime "^6.26.0"
-    escodegen "^2.0.0"
-
 object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"

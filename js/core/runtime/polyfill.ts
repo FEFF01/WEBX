@@ -1,7 +1,7 @@
 import {
     Subscriber, observable, sandbox, action, runInAction, runInSandbox, SANDOBX_OPTION, SUBSCRIBE_OPTION,
     transacts, TRANSACTS_OPTION, computed, watch, Observer, RECORD_TYPE, MASK_ITERATE, MASK_UNDEFINED
-} from 'obb';
+} from '../../obb/js/obb';
 
 import {
     Sibling,
@@ -50,7 +50,7 @@ function nextIfSibling(
     alternate?: Function
 ) {
     let parent_subscriber = Subscriber.PARENT;
-    let subscriber: any;
+    let subscriber: Subscriber;
     watch(test, function (new_val: any, old_val: any) {
         let callback: Function;
         if (!subscriber || !new_val !== !old_val) {
@@ -63,6 +63,7 @@ function nextIfSibling(
             subscriber && subscriber.mount(parent_subscriber);
         }
     }, true);
+
 }
 
 function nextEntrySibling(
@@ -77,7 +78,6 @@ function nextEntrySibling(
     }
     let target: any;
 
-    let getData = computed(data);
 
     let old_control_set: Array<Control> = [];
     let old_value_set: Array<any> = [];
@@ -213,6 +213,7 @@ function nextEntrySibling(
                     newest_values = Object.values(target);
                 }
             }
+            
             new_control_set = [];
             new_value_set = [];
             new_key_set = [];
@@ -303,6 +304,7 @@ function nextEntrySibling(
             }
         }
     );
+    let getData = computed(data, subscriber);
     subscriber.mount();
 }
 export {

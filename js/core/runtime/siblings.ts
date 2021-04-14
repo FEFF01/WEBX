@@ -4,7 +4,7 @@
 import {
     Subscriber, observable, sandbox, action, runInAction, runInSandbox, SANDOBX_OPTION, SUBSCRIBE_OPTION,
     transacts, TRANSACTS_OPTION, computed, watch, Observer
-} from 'obb';
+} from '../../obb/js/obb';
 
 const ELEMENT_TO_LAST_SIBLING = new WeakMap();
 

@@ -24,7 +24,7 @@ import {
 } from './astgen'
 
 import { volatileId, decodeDeclarator, decodeDeclarations, DeclareProps, num2id } from './utils'
-import { SANDOBX_OPTION } from 'obb';
+import { SANDOBX_OPTION } from '../../obb/js/obb';
 
 
 function CREATE_COMPONENT(id: string, operations?: Array<Node>) {

@@ -37,10 +37,10 @@ declare function FUNCTION_EXPRESSION(body: Array<Node> | Node, params?: Array<No
 };
 declare function VARABLE_DECLARATOR(id: string | Node, init?: Node): {
     type: string;
-    id: Node | {
+    id: {
         type: string;
         name: string;
-    };
+    } | Node;
     init: Node;
 };
 declare function VARIABLE_DECLARATION(declarations: Array<Node>, kind?: string): {

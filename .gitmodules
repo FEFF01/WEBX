@@ -2,3 +2,7 @@
 	path = js/Dison
 	url = https://github.com/FEFF01/Dison.git
 	branch = master
+[submodule "js/obb"]
+	path = js/obb
+	url = https://github.com/FEFF01/obb.git
+	branch = main

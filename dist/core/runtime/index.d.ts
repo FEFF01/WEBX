@@ -1,4 +1,4 @@
-import { observable, action, runInAction } from 'obb';
+import { observable, action, runInAction } from '../../obb/js/obb';
 import { Sibling, Children, NodeList } from './siblings';
 import { entryStatement, nextIfSibling, nextEntrySibling } from './polyfill';
 declare global {
