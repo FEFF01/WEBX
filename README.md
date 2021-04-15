@@ -9,6 +9,20 @@
 > * [在线代码编辑器](https://feff01.github.io/WEBX/dist/editor.html)
 > * [40000 递归组件生成 & 更新测试](https://feff01.github.io/WEBX/dist/performance-webx.html)
 
+### 使用（ 现在只有简易的 webpack loader ）
+> * 安装
+```bash
+yarn add webx-loader --dev
+```
+> * 使用 （ module -> rules -> ）
+```javascript
+    {
+        test: /\.webx$/,
+        loader: "webx-loader",
+        exclude: /node_modules/,
+    }
+```
+
 ### 主要规则
 
 > 在 `JS` 环境中字面上的标签为 Element 表达式
