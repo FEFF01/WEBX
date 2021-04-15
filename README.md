@@ -16,7 +16,7 @@
 ```bash
 yarn add webx-loader --dev
 ```
-> * 使用 （ module -> rules -> ）
+> * 使用 （ webpack.config -> module -> rules -> ）
 ```javascript
     {
         test: /\.webx$/,
