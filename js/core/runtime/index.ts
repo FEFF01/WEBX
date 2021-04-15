@@ -86,7 +86,7 @@ function setNodes(sibling: Sibling, els: Node | any) {
 }
 
 
-window._webx = {
+let webx = {
     prevent,
     autorun,
     action,
@@ -108,7 +108,8 @@ window._webx = {
     createElement,
     createTextNode
 };
-
+typeof window === "object" && (window._webx = webx);
+export default webx;
 export {
     prevent,
     autorun,

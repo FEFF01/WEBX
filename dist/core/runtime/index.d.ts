@@ -18,4 +18,27 @@ declare function insertBefore(parent: Element, target: Node, ref: Element): void
 declare function createElement(tagName: string): HTMLElement;
 declare function createTextNode(data: any): Text;
 declare function setNodes(sibling: Sibling, els: Node | any): void;
+declare let webx: {
+    prevent: typeof prevent;
+    autorun: typeof autorun;
+    action: typeof action;
+    runInAction: (fn: Function, ...args: any[]) => any;
+    observable: typeof observable;
+    nextChild: typeof nextChild;
+    nextSibling: typeof nextSibling;
+    nextNodes: typeof nextNodes;
+    setNodes: typeof setNodes;
+    nextIfSibling: typeof nextIfSibling;
+    nextEntrySibling: typeof nextEntrySibling;
+    entryStatement: typeof entryStatement;
+    removeAllSibling: typeof removeAllSibling;
+    setAttribute: typeof setAttribute;
+    setText: typeof setText;
+    addEventListener: typeof addEventListener;
+    appendChild: typeof appendChild;
+    insertBefore: typeof insertBefore;
+    createElement: typeof createElement;
+    createTextNode: typeof createTextNode;
+};
+export default webx;
 export { prevent, autorun, action, runInAction, observable, nextChild, nextSibling, nextNodes, setNodes, nextIfSibling, nextEntrySibling, entryStatement, removeAllSibling, setAttribute, setText, addEventListener, appendChild, insertBefore, createElement, createTextNode };
