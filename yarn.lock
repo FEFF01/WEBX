@@ -5760,6 +5760,11 @@ websocket-extensions@>=0.1.1:
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
   integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
+webx-loader@^0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/webx-loader/-/webx-loader-0.0.0.tgz#6bf8caeb23212d317a36ce4e575b199e6864b40c"
+  integrity sha512-F5joQ8U5bjBqsKqlJWM3Aq3Zc7wOSMFLv3+YU/dX0fNNBW0vutG9ynDTWm56wk/cMz1tEI8r5Thar4o7vtq7Jg==
+
 which-boxed-primitive@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/which-boxed-primitive/-/which-boxed-primitive-1.0.2.tgz#13757bc89b209b049fe5d86430e21cf40a89a8e6"

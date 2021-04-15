@@ -11,7 +11,7 @@ function get_entry(dir) {
     return fs.readdirSync(path.resolve(__dirname, dir)).reduce(
         (entry, file_name) => {
             if (
-                /\.(js|ts)$/.test(file_name) &&
+                /\.(js|ts|webx)$/.test(file_name) &&
                 fs.statSync(path.resolve(__dirname, dir + file_name)).isFile()
             ) {
                 entry[dir + file_name.replace(/\.[^\.]+$/, "")] = path.resolve(__dirname, dir + file_name)
@@ -34,7 +34,7 @@ module.exports = {
         filename: 'js/[name].js',
         chunkFilename: 'js/[id].js',
         //globalObject: "this",
-        //libraryTarget: "umd"
+        //libraryTarget: "commonjs"
     },
     module: {
         unknownContextCritical: false,
@@ -53,11 +53,21 @@ module.exports = {
                     }
                 }]
             }, {
+                test: /\.webx$/,
+                use: [
+                    //"babel-loader",
+                    {
+                        loader: "webx-loader"
+                    },
+                ],
+                exclude: /node_modules/,
+            },
+            {
                 test: /\.js$/,
                 exclude: /(node_modules|bower_components)/,
                 use: {
                     loader: 'babel-loader',
-                    options: {
+                    /*options: {
                         presets: [
                             ['@babel/preset-env', {
                                 targets: {
@@ -73,7 +83,7 @@ module.exports = {
                             }]
                         ],
                         comments: false
-                    }
+                    }*/
                 },
             }],
     },
