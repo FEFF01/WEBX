@@ -3,14 +3,18 @@
 
 import 'input-listener';
 import './core/runtime/'
-import converter from './core/converter';
-import parser from './core/parser';
+import { convert } from './core/converter';
+import { parse } from './core/parser';
 
 let escodegen = require('escodegen');
-window.parser = parser;
+
+window.parse = parse;
+window.convert = convert;
+
+
 
 export default window.webx = function (input) {
-    let ast = converter(parser(input));
+    let ast = convert(parse(input));
 
     let output = escodegen.generate(
         ast

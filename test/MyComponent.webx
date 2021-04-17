@@ -1,0 +1,24 @@
+
+function MyComponent({list,children}){
+    let name="";
+    return <ul class="my-component">
+        <input value=@(name) placeholder="name"/>
+        <button onclick=function(){
+            list.unshift({name});
+            name="";
+        }>add</button>
+        @:for(let item of list){
+            <li>
+                @{item.name}
+                @:if(item.nodes){
+                    <MyComponent list=@(item.nodes)/>
+                }else{
+                    <button onclick=function(){
+                        item.nodes=[];
+                    }>+</button>
+                }
+            </li>
+        }
+    </ul>
+}
+export default  MyComponent;

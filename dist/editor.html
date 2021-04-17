@@ -43,7 +43,7 @@ document.body.appendChild(
         <AddSupport/>
 
         <ul class="support-list">
-            @:for(let index in support_list){/*support_list->([name,data],index) */
+            @:for(let index in support_list){
                 let [name,data]=support_list[index];
                 <Draggable index=@(index) list=@(support_list)>
                     @:if(name===0)
@@ -211,7 +211,6 @@ function Draggable({index,list,children}){
     return container;
 
 }
-
 function SupportTable(){
 
     let focus_item,focus_index;
@@ -341,7 +340,9 @@ window.onclick=function(e){
         e.target.className=Math.random().toString(36).slice(2,6);
     }
 }
+
 document.body.appendChild(<div>
+
 @{
     let name="";
     /*for(var [a,b=2] of [[2],[3,1],[6]]){

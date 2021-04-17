@@ -184,6 +184,7 @@ export {
 }
 
 let parser = new WEBXParser();
-export default function (input: string) {
+export function parse(input: string) {
     return parser.parse(input);
 };
+export default WEBXParser;

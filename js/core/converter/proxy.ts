@@ -159,7 +159,8 @@ class ProxyNode {
                     && parent.node instanceof Array
                     && !(node instanceof Array)
                 ) {
-                    parent.node.splice(Number(prop), 1, ...wrap_node);//epoch
+                    let index = parent.node.indexOf(node);
+                    parent.node.splice(index, 1, ...wrap_node);//epoch
                     wrap_node = parent.node[prop];
                     return wrap_node && new ProxyNode(wrap_node, parent, prop);
                 }
@@ -176,7 +177,7 @@ class ProxyNode {
                 this[PROXY_NODE.REFERENCE_RECORD]
             );
         }
-        parent && (parent[prop] = this);
+        parent && prop && (parent[prop] = this);
 
 
 
@@ -211,6 +212,12 @@ class ProxyNode {
 
 
 const REFERENCE_RULES = {
+    ExportNamedDeclaration: {   //临时处理，ecpho 1 之后 会将 specifiers 处理为 declarations
+        specifiers: ["local"]
+    },
+    ExportDefaultDeclaration: [
+        "declaration"
+    ],
     MethodDefinition: [
         ["computed", true],
         "key"
@@ -333,7 +340,7 @@ const BUBBLE_HOOKS = {
         let top_index = 0;
         let top_list: Array<Node> = node.body;
         top_list.every(function (node: Node, index: number) {
-            if (node.directive) {
+            if (node.directive || node.type === "ImportDeclaration") {
                 top_index = index + 1;
                 return true;
             }
@@ -349,7 +356,73 @@ function addAssignRecord(proxy_node: Node, name: string, props: DeclareProps) {
 }
 
 const CAPTURE_HOOKS = {
+    ExportNamedDeclaration(node: Node) {
+        if (node.specifiers.length) {
+            if (this[PROXY_NODE.BLOCK_SCOPED_STACK][0][PROXY_NODE.NEPOCH] < 1) {
+                return 0;
+            }
+            let specifiers = [];
+            let declarations = [];
+            for (let specifier of node.specifiers) {
+                let id = specifier.exported.name, local = specifier.local;
+                if (id !== local.name) {
+                    declarations.push(
+                        VARABLE_DECLARATOR(
+                            id, local
+                        )
+                    )
+                } else {
+                    specifiers.push(specifier);
+                }
+            }
 
+            if (!declarations.length) {
+                return;
+            }
+            let res = {
+                type: "ExportNamedDeclaration",
+                declaration: VARIABLE_DECLARATION(
+                    declarations
+                    , "var"
+                ),
+                specifiers: [],
+                source: null
+            };
+
+            if (specifiers.length) {
+                return [
+                    res,
+                    {
+                        type: "ExportNamedDeclaration",
+                        declaration: null,
+                        specifiers: specifiers,
+                        source: null
+                    }
+                ]
+            }
+            return res;
+        }
+    },
+    ImportDeclaration(node: Node) {
+        for (let specifier of node.specifiers) {
+            switch (specifier.type) {
+                case "ImportDefaultSpecifier":
+                    setDeclare(
+                        this[PROXY_NODE.FUNCTION_SCOPED_STACK][0],
+                        specifier.local.name,
+                        [specifier.local]
+                    );
+                    break;
+                case "ImportSpecifier":
+                    setDeclare(
+                        this[PROXY_NODE.FUNCTION_SCOPED_STACK][0],
+                        node.imported.name,
+                        [specifier.imported]
+                    );
+                    break;
+            }
+        }
+    },
     Element: createElement,
     PreventExpression(node: Node) {
         return PREVENT([RETURN_STATEMENT(node.expression)]);
@@ -364,6 +437,11 @@ const CAPTURE_HOOKS = {
 
         scoped_node[PROXY_NODE.OBSERVER_MARKS]["-" + id] |= OBSERVER_MARK.NEED_REDECLARE;
         setDeclare(scoped_node, id, [node], true);
+        /**
+         * ActionDeclaration 是要被剔除重新定义的
+         * 这里 使其内部节点能被正常处理
+         */
+        _ProxyNode(node.action, this.parent);
         return [];
     },
     ActionExpression(node: Node) {
@@ -480,6 +558,9 @@ const CAPTURE_HOOKS = {
         let parent_type = parent_node.type;
         let declaration_node = this;
         let declarations = node.declarations;
+        if (parent_type === "ExportNamedDeclaration") {
+            return;
+        }
         if (
             parent_type === "ForStatement"
             || parent_type === "ForInStatement"

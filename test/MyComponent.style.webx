@@ -1,0 +1,7 @@
+
+let color="#ea0";
+export default <style>
+    .my-component button{
+        color:((color));
+    }
+</style>

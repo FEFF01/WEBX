@@ -1,15 +1,16 @@
+import {
+    Token, Node, Context, CONTEXT, MatchTree, Validate, MARKS, SourceLocation, Position
+} from '../../Dison/js/interfaces'
 
 import { ProxyNode } from './proxy'
 import { IDENTIFIER } from './astgen'
 
-
-export default function (ast: Node) {
+function convert(ast: Node) {
     return new ProxyNode(ast).node;
 }
-
 let id = IDENTIFIER("_webx");
 
-export const runtime = {
+const runtime = {
     type: "VariableDeclaration",
     kind: "var",
     declarations: [
@@ -308,6 +309,21 @@ export const runtime = {
         }
     ]
 };
+
+
+export default class Converter {
+    convert = convert
+};
+export {
+    convert, runtime
+}
+
+
+
+
+
+
+
 /*
 export const runtime = `
 var _webx = window._webx,

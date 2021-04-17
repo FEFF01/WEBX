@@ -276,7 +276,7 @@ function makeObserver(scoped_node: ProxyNode, depth: number) {
         let declaration_index = 0;
 
         toplevel_list.every(function (node, index) {
-            if (node.directive) {
+            if (node.directive || node.type === "ImportDeclaration") {
                 declaration_index = index + 1;
                 return true;
             }
@@ -483,12 +483,12 @@ function decodeDeclarator(
     walk(declaration, props);
     function walk(node: Node, props: DeclareProps) {
         switch (node.type) {
+            case "Identifier":
+                callback(node.name, props);
+                break;
             case "VariableDeclarator":
                 props.push([node, "init"]);
                 walk(node.id, props);
-                break;
-            case "Identifier":
-                callback(node.name, props);
                 break;
             case "AssignmentPattern":
                 walk(node.left, [[props, node.right]]); //

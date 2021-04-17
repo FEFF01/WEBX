@@ -1,5 +1,6 @@
-export default function (ast: Node): any;
-export declare const runtime: {
+import { Node } from '../../Dison/js/interfaces';
+declare function convert(ast: Node): any;
+declare const runtime: {
     type: string;
     kind: string;
     declarations: {
@@ -22,3 +23,7 @@ export declare const runtime: {
         };
     }[];
 };
+export default class Converter {
+    convert: typeof convert;
+}
+export { convert, runtime };

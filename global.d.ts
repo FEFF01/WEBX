@@ -6,4 +6,5 @@ interface Window {
 interface Object {
     __proto__: any
 }
+declare module '*.webx'
 //declare var _webx: any;

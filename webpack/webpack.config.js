@@ -24,6 +24,7 @@ function get_entry(dir) {
 
 module.exports = {
     mode: 'production',
+    //mode: 'development',
     entry: {
         ...get_entry('../js/'),
         //vendor: ['babel-polyfill']
@@ -54,36 +55,14 @@ module.exports = {
                 }]
             }, {
                 test: /\.webx$/,
-                use: [
-                    //"babel-loader",
-                    {
-                        loader: "webx-loader"
-                    },
-                ],
+                loader: "webx-loader",
                 exclude: /node_modules/,
             },
             {
                 test: /\.js$/,
                 exclude: /(node_modules|bower_components)/,
                 use: {
-                    loader: 'babel-loader',
-                    /*options: {
-                        presets: [
-                            ['@babel/preset-env', {
-                                targets: {
-                                    browsers: ['> 1%', 'last 2 versions']
-                                },
-                                modules: false,
-                                "useBuiltIns": false,
-                            }]
-                        ],
-                        "plugins": [
-                            "transform-class-properties", ["transform-es2015-for-of", {
-                                "loose": true
-                            }]
-                        ],
-                        comments: false
-                    }*/
+                    loader: 'babel-loader'
                 },
             }],
     },

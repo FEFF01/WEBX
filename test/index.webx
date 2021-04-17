@@ -1,0 +1,11 @@
+
+import MyComponent from './MyComponent.webx';
+import style from './MyComponent.style.webx';
+let list=[
+    {name:"aaa"},
+    {name:"bbb",nodes:[{name:"ccc"}]}
+]
+
+export {style};
+export const component=<MyComponent list=@(list)/>;
+export default list

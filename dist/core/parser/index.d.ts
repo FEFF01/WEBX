@@ -1,4 +1,5 @@
-import { Node, MatchTree } from '../../Dison/js/interfaces';
+import { Token, Node, MatchTree } from '../../Dison/js/interfaces';
+import Parser from '../../Dison/js/parser';
 import './script-extends';
 declare let EXPRESSION_TREE: MatchTree;
 declare const SYNTAX_TREE: Record<string, any>;
@@ -7,5 +8,35 @@ declare function isDeclaration(node: Node): any;
 declare function isStatement(node: Node): any;
 declare function isStatementListItem(node: Node): any;
 declare function isModuleItem(node: Node): any;
+declare class WEBXParser extends Parser {
+    token_hooks: Record<string, (token: Token, tokenizer?: import("../../Dison/js/tokenizer").default | Parser) => Token>;
+    TYPE_ENUMS: {
+        Identifier: string;
+        Keyword: string;
+        String: string;
+        Boolean: string;
+        Numeric: string;
+        Punctuator: string;
+        RegularExpression: string;
+        Template: string;
+        TemplateElement: string;
+        Comments: string;
+        Null: string;
+    };
+    PRIMARY_EXPR_START_PUNCTUATORS_TREE: import("../../Dison/js/interfaces").SearchTree;
+    PUNCTUATORS_TREE: import("../../Dison/js/interfaces").SearchTree;
+    TOKEN_TYPE_MAPPERS: Record<string, string | number>;
+    SYNTAX_TREE: Record<string, any>;
+    EXPRESSION_TREE: Record<string, any>;
+    isExpression: typeof isExpression;
+    isStatement: typeof isStatement;
+    isStatementListItem: typeof isStatementListItem;
+    isDeclaration: typeof isDeclaration;
+    isModuleItem: typeof isModuleItem;
+    isPrimaryExprStart(): boolean;
+    inIdentifierStart(): number;
+    inIdentifierPart(): number;
+}
 export { isExpression, isStatement, isStatementListItem, isDeclaration, isModuleItem, SYNTAX_TREE, EXPRESSION_TREE, };
-export default function (input: string): any;
+export declare function parse(input: string): any;
+export default WEBXParser;
