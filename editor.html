@@ -362,7 +362,7 @@ document.body.appendChild(<div>
 
     <script id="webx_editor" type="text/babel">
         let editor_width , is_draging = false;
-        
+
         document.body.appendChild(
             <session class="container">
                 <main  class="main-panel" >
@@ -370,10 +370,28 @@ document.body.appendChild(<div>
                         /*window.top===window   //展示自洽递归的编辑器
                             ?window.webx_editor.innerHTML
                             :webx_demo.innerHTML*/
-                        webx_demo.innerHTML
+                        location.hash.length>1
+                            ?decodeURIComponent(location.hash.slice(1))
+                            :webx_demo.innerHTML
                     }</div>
                     @{resizeable_line()}
                     <fotter class="fotter-bar">
+                        <button 
+                            onclick = function (e){
+                                let value=editor.getValue();
+                                if(value!==webx_demo.innerHTML){
+                                    location.hash=encodeURIComponent(value);
+                                }else{
+                                    history.replaceState(null,"",location.pathname)
+                                }
+                                var clipboard = new ClipboardJS(e.target, {
+                                    text: function() {
+                                        return location.href;
+                                    }
+                                });
+                                clipboard.onClick(e);
+                            }
+                        >Copy URL</button>
                         <button 
                             class = "btn-build"
                             onclick = function output(e){

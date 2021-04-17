@@ -2,7 +2,8 @@
 
 
 import 'input-listener';
-import './core/runtime/'
+import './core/runtime/';
+import './clipboard';
 import { convert } from './core/converter';
 import { parse } from './core/parser';
 
