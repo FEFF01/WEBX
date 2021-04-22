@@ -27,21 +27,7 @@ abstract class Sibling {
     }
     abstract appendTo(): void;
     abstract insertBefore(node: Node): void;
-    abstract removeAllNodes(): void;
-    abstract addNodes(val: any, bak_nodes?: Array<Node>): void;
-
-    setNodes(val: any) {
-        if (!this.target) {
-            //console.log("warn", this);
-            return;
-        }
-        let nodes = this.nodes;
-        let has_bak = nodes.length;
-        let bak_nodes = has_bak && nodes.slice();
-
-        has_bak && this.removeAllNodes();
-        this.addNodes(val, bak_nodes);
-    }
+    abstract setNodes(val: any): void;
 
     moveTo(to: number) {
         let from = this.index;
@@ -161,9 +147,93 @@ abstract class Sibling {
     }
 
 }
+function unfold(val: any) {
+    let vessel = [];
+    _walk(val);
+
+    return vessel;
+
+    function _walk(list: any) {
+        if (list instanceof Array) {
+            list.forEach(_walk);
+        } else if (list !== null && list !== undefined) {
+            vessel.push(list);
+        }
+    }
+}
+
+
 class Children extends Sibling {
     target: Element
 
+    setNodes(val: any) {
+        if (!this.target) {
+            //console.log("warn", this);
+            return;
+        }
+        let parent = this.target;
+        let raw_nodes = unfold(val);
+        let old_nodes = this.nodes;
+        let new_nodes: Array<Node> = [];
+
+
+        let reference_node = this.next && this.next.firstNode();
+
+        raw_nodes.length ? _walk() : _final();
+
+        this.nodes = new_nodes;
+
+        function _final() {
+            for (let i = new_nodes.length; i < old_nodes.length; i++) {
+                let old_node = old_nodes[i];
+                new_nodes.includes(old_node) || _webx.removeNode(old_node);
+            }
+        }
+        function _walk() {
+            let index = new_nodes.length;
+            let new_node = raw_nodes.shift();
+            let old_node = old_nodes[index];
+            if (!(new_node instanceof Node)) {
+                if (
+                    index < old_nodes.length
+                    && old_node.nodeType === Node.TEXT_NODE
+                ) {
+                    _webx.setText(old_node, new_node);
+                    new_node = old_node;
+                } else {
+                    new_node = _webx.createTextNode(new_node);
+                }
+            }
+
+            if (index < old_nodes.length) {
+                if (
+                    old_node !== new_node
+                    && !raw_nodes.includes(old_node)
+                    && !new_nodes.includes(old_node)
+                ) {
+                    _webx.removeNode(old_node);
+                }
+            }
+            new_nodes.push(new_node);
+
+
+            raw_nodes.length ? _walk() : _final();
+            /**
+             * 使用递归的处理和 previousSibling 对比等操作主要是维持原有 DOM 的稳定性
+             * （减少由于列表变更导致 insert append 等操作造成的 DOM 刷新）
+             */
+            if (reference_node) {
+                if (
+                    reference_node.previousSibling !== new_node
+                ) {
+                    _webx.insertBefore(parent, new_node, reference_node);
+                }
+            } else {
+                _webx.appendChild(parent, new_node);
+            }
+            reference_node = new_node;
+        }
+    }
     appendTo() {
         for (let node of this.nodes) {
             this.target.appendChild(node);
@@ -182,49 +252,6 @@ class Children extends Sibling {
             sibling.insertBefore(referenceNode);
         }
     }
-    removeAllNodes() {
-        for (let node of this.nodes) {
-            let parent = node.parentElement;
-            parent && parent.removeChild(node);
-        }
-        this.nodes.length = 0;
-    }
-    addNodes(val: any, reuses?: Array<Node>) {
-        if (val === undefined || val === null) {
-            return;
-        }
-
-        let nodes = this.nodes;
-        let node: Node;
-
-        switch (true) {
-            case val instanceof Node:
-                nodes.push(node = val);
-                break;
-            case val instanceof Array:
-                for (let item of val) {
-                    this.addNodes(item, reuses)
-                }
-                return;
-            default:
-                /**
-                 * 复用大部分在数据特征鉴定部分完成（nextEntrySibling autorun），
-                 * 这里仅做对 TextNode 的简单处理
-                 */
-                if (reuses && reuses.length && reuses[0].nodeType === Node.TEXT_NODE) {
-                    _webx.setText(node = reuses.shift(), val);
-                } else {
-                    node = _webx.createTextNode(val)
-                }
-                nodes.push(node);
-                break;
-        }
-
-        let reference_node = this.next && this.next.firstNode();
-        reference_node
-            ? _webx.insertBefore(this.target, node, reference_node)
-            : _webx.appendChild(this.target, node);
-    }
 }
 class NodeList extends Sibling {
     target: Array<Node>;
@@ -233,35 +260,52 @@ class NodeList extends Sibling {
         super(target, prev);
         this.raw = Observer.TO_RAW(target);
     }
-    /*setNodes = sandbox(
-        // target 可能是可观测对象，这里用 sanbox 防止当前操作所需数据被订阅
-        super.setNodes.bind(this),
-        SANDOBX_OPTION.PREVENT_COLLECT
-    )*/
+
     setNodes(val: any) {
-        /**
-         * 基础功能使用 subscriber.option 比 sandbox 效率 更高一些
-         * 现有的使用 sibling 管理节点执行环境中不存 Subscriber.PARENT 为空的情况
-         */
-        let subscriber = Subscriber.PARENT;
-        let option = subscriber.option;
-        subscriber.option = option | SUBSCRIBE_OPTION.PREVENT_COLLECT;
-        super.setNodes(val);
-        subscriber.option = option;
-    }
-    moveTo(to: number) {
-        let subscriber = Subscriber.PARENT;
-        let option = subscriber.option;
-        subscriber.option = option | SUBSCRIBE_OPTION.PREVENT_COLLECT;
-        super.moveTo(to);
-        subscriber.option = option;
-    }
-    removeSibling(sibling: Sibling) {
-        let subscriber = Subscriber.PARENT;
-        let option = subscriber.option;
-        subscriber.option = option | SUBSCRIBE_OPTION.PREVENT_COLLECT;
-        super.removeSibling(sibling);
-        subscriber.option = option;
+
+        if (!this.target) {
+            //console.log("warn", this);
+            return;
+        }
+        let raw_nodes = unfold(val);
+        let old_nodes = this.nodes;
+        let new_nodes: Array<Node> = [];
+        let old_node: Node;
+        let new_node: Node;
+        let cursor = 0;
+
+
+        while (raw_nodes.length) {
+            new_node = raw_nodes.shift();
+            if (!(new_node instanceof Node)) {
+                if (
+                    cursor < old_nodes.length
+                    && (old_node = old_nodes[cursor]).nodeType === Node.TEXT_NODE
+                ) {
+                    if (_webx.getText(old_node) != new_node) {
+                        _webx.setText(old_node, new_node);
+                    }
+                    new_node = old_node;
+                } else {
+                    new_node = _webx.createTextNode(new_node);
+                }
+            }
+            new_nodes.push(new_node);
+            cursor += 1;
+        }
+        let list = this.target;
+        let raw_list = this.raw;
+        if (old_nodes.length) {
+            list.splice(raw_list.indexOf(old_nodes[0]), old_nodes.length, ...new_nodes);
+        } else {
+            let reference_node = this.next && this.next.firstNode();
+            if (reference_node) {
+                list.splice(raw_list.indexOf(reference_node), 0, ...new_nodes);
+            } else {
+                list.push(...new_nodes);
+            }
+        }
+        this.nodes = new_nodes;
     }
     appendTo() {
         let list = this.target;
@@ -283,11 +327,9 @@ class NodeList extends Sibling {
         let nodes = this.nodes;
 
         if (nodes.length) {
-            let index = raw_list.indexOf(referenceNode);
             list.splice(raw_list.indexOf(nodes[0]), nodes.length);
-            for (let node of nodes) {
-                list.splice(index, 0, node);
-            }
+            let index = raw_list.indexOf(referenceNode);
+            list.splice(index, 0, ...nodes);
         }
         for (let sibling of this.siblings) {
             sibling.insertBefore(referenceNode);
@@ -297,48 +339,10 @@ class NodeList extends Sibling {
     removeAllNodes() {
         let list = this.target;
         let raw_list = this.raw;
-        for (let node of this.nodes) {
-            list.splice(raw_list.indexOf(node), 1);
-        }
-        this.nodes.length = 0;
-    }
-    addNodes(val: any, reuses?: Array<Node>) {
-        if (val === undefined || val === null) {
-            return;
-        }
-
         let nodes = this.nodes;
-        let node: Node;
-
-        switch (true) {
-            case val instanceof Node:
-                nodes.push(node = val);
-                break;
-            case val instanceof Array:
-                for (let item of val) {
-                    this.addNodes(item, reuses)
-                }
-                return;
-            default:
-                /**
-                 * 复用大部分在数据特征鉴定部分完成（nextEntrySibling autorun），
-                 * 这里仅做对 TextNode 的简单处理
-                 */
-                if (reuses && reuses.length && reuses[0].nodeType === Node.TEXT_NODE) {
-                    _webx.setText(node = reuses.shift(), val);
-                } else {
-                    node = _webx.createTextNode(val)
-                }
-                nodes.push(node);
-                break;
-        }
-        let reference_node = this.next && this.next.firstNode();
-        let list = this.target;
-        let raw_list = this.raw;
-        if (reference_node) {
-            list.splice(raw_list.indexOf(reference_node), 0, node);
-        } else {
-            list.push(node);
+        if (nodes.length) {
+            list.splice(raw_list.indexOf(nodes[0]), nodes.length);
+            nodes.length = 0;
         }
     }
 }

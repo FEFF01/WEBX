@@ -1,7 +1,15 @@
 import { Node } from '../../Dison/js/interfaces';
 import { DeclareProps } from './utils';
-declare function CREATE_COMPONENT(id: string, operations?: Array<Node>): any;
-declare function CREATE_ELEMENT(tag: string, operations?: Array<Node>): any;
+declare function CREATE_COMPONENT(id: string, props: Array<Node>, children: Array<Node>): {
+    type: string;
+    callee: Node;
+    arguments: Node[];
+};
+declare function CREATE_ELEMENT(tag: string, props: Array<Node>, children: Array<Node>): Node[] | {
+    type: string;
+    callee: Node;
+    arguments: Node[];
+};
 declare function ADD_EVENT_LISTENER(...args: Array<Node>): {
     type: string;
     expression: Node;

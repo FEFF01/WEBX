@@ -24,7 +24,8 @@ import {
     OBSERVABLEABLE,
     RUN_IN_ACTION_STATEMENT,
     ACTION_EXPRESSION,
-    PROPS_TO_EXPRESSION
+    PROPS_TO_EXPRESSION,
+    _AutoRun
 } from './operations';
 
 import {
@@ -52,6 +53,7 @@ import {
 } from './utils'
 
 import { runtime } from './index'
+import { isExpression } from '../parser';
 
 
 const enum SCOPE_STATUS {
@@ -120,7 +122,7 @@ function _ProxyNode(node: Node, parent?: ProxyNode, prop?: string | number) {
     }
 }
 class ProxyNode {
-
+    static isExternalDeclaration: (id: string) => boolean;
     [PROXY_NODE.FUNCTION_DECLARES]: Record<string, any>;
     [PROXY_NODE.FUNCTION_SCOPED_STACK]: Array<ProxyNode>;
 
@@ -299,9 +301,7 @@ function _paramsToDeclaration(node: Node) {
         ) {
             has_convert = true;
             for (let [id, props] of pattern_set) {
-                body.splice(
-                    0,
-                    0,
+                body.unshift(
                     VARIABLE_DECLARATION(
                         [VARABLE_DECLARATOR(
                             id,
@@ -407,17 +407,11 @@ const CAPTURE_HOOKS = {
         for (let specifier of node.specifiers) {
             switch (specifier.type) {
                 case "ImportDefaultSpecifier":
+                case "ImportSpecifier":
                     setDeclare(
                         this[PROXY_NODE.FUNCTION_SCOPED_STACK][0],
                         specifier.local.name,
                         [specifier.local]
-                    );
-                    break;
-                case "ImportSpecifier":
-                    setDeclare(
-                        this[PROXY_NODE.FUNCTION_SCOPED_STACK][0],
-                        node.imported.name,
-                        [specifier.imported]
                     );
                     break;
             }
@@ -648,11 +642,38 @@ function setDeclare(
 }
 
 
+function createNode(proxy_node: ProxyNode, body: Node | Array<Node>, is_reactive: boolean | number) {
+    let parent = proxy_node.parent.parent?.node;
+    let node: Node;
+    if (
+        parent
+        && parent.type === "CallExpression"
+        && (
+            parent.callee.name === "_webx_next_child"
+            || parent.callee.name === "_webx_next_nodes"
+        )
+    ) {
+        if (is_reactive) {
+            parent.arguments[3] = LITERAL(1);
+            node = isExpression(body) ? body : _AutoRun(FUNCTION_EXPRESSION(body), true);
+        } else {
+            parent.arguments.length = 2;
+            node = body;
+        }
+    } else {
+        node = is_reactive && !isExpression(body)
+            ? AUTORUN(body, true)
+            : is_reactive === true ? CALL_EXPRESSION(body) : body;
+    }
+    node.range = proxy_node.node.range;
+    node.loc = proxy_node.node.loc;
+    return node;
+}
 
 function createComponent(node: Node) {
-    let content: Array<Node> = [];
+    let props: Array<Node> = [];
+    let children: Array<Node> = [];
 
-    let props = IDENTIFIER("_webx$_props")
     for (let attribute of node.openingTag.attributes) {
         let attribute_name = attribute.name;
         let attribute_value = attribute.value || LITERAL("");
@@ -662,18 +683,21 @@ function createComponent(node: Node) {
             attribute_value = attribute_value.expression;
         }
         let set_attribute = ASSIGNMENT_STATEMENT(
-            MEMBER_EXPRESSION(props, attribute_name),
+            MEMBER_EXPRESSION(IDENTIFIER("_webx$_props"), attribute_name),
             attribute_value
         );
-        content.push(
+        props.push(
             is_binding ? AUTORUN_STATEMENT(set_attribute) : set_attribute
         );
     }
 
-    node.children && buildChildren(node.children, content);
+    node.children && buildChildren(node.children, children);
 
-
-    return CREATE_COMPONENT(node.openingTag.name, content);
+    return createNode(
+        this,
+        CREATE_COMPONENT(node.openingTag.name, props, children),
+        true
+    );
 }
 
 const ATTRIBUTE_TO_EVENT = {
@@ -696,19 +720,28 @@ function createElement(node: Node) {
         return 0;
     }
 
-    if (maybe_component && this[PROXY_NODE.BLOCK_DECLARES]["-" + tag_name]) {
+    if (
+        maybe_component
+        && (
+            this[PROXY_NODE.BLOCK_DECLARES]["-" + tag_name]
+            ||
+            ProxyNode.isExternalDeclaration
+            && ProxyNode.isExternalDeclaration(tag_name)
+        )
+    ) {
         return createComponent.call(this, node);
     }
 
-    let content: Array<Node> = [];
+    let props: Array<Node> = [];
+    let children: Array<Node> = [];
 
-    node.children && buildChildren(node.children, content);
+    node.children && buildChildren(node.children, children);
 
     for (let attribute of node.openingTag.attributes) {
         let attribute_name = attribute.name.name;
         let attribute_value = attribute.value || LITERAL("");
 
-        content.push(
+        props.push(
             SET_ATTRIBUTE(
                 attribute_name,
                 attribute_value,
@@ -720,7 +753,7 @@ function createElement(node: Node) {
             case "input":
                 if (attribute_value.type === "BindingExpression") {
                     let event = ATTRIBUTE_TO_EVENT[attribute_name];
-                    content.push(
+                    props.push(
                         SET_MODEL_REACTIVE(
                             event, attribute_value.expression, attribute_name
                         )
@@ -730,9 +763,11 @@ function createElement(node: Node) {
         }
     }
 
-    return CREATE_ELEMENT(tag_name, content);
-
-
+    return createNode(
+        this,
+        CREATE_ELEMENT(node.openingTag.name, props, children),
+        props.length || children.length
+    );
 }
 
 function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
@@ -747,6 +782,7 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
                 continue;
             case "Element":
                 getter = node;
+                is_reactive = true;
                 break;
             case "BindingStatement":
                 node = node.statement;
@@ -770,7 +806,10 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
                 node = body[0];
             case "BindingExpression":
                 getter = node.expression;
-                is_reactive = getter.type !== "Literal";
+                if (getter.type !== "Literal") {
+                    is_reactive = true;
+                    getter = FUNCTION_EXPRESSION(RETURN_STATEMENT(getter));
+                }
                 break;
             case "CSSRule":
                 buildChildren(node.children, bind_nodes);

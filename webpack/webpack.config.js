@@ -55,8 +55,7 @@ module.exports = {
                 }]
             }, {
                 test: /\.webx$/,
-                loader: "webx-loader",
-                exclude: /node_modules/,
+                loader: "webx-loader"
             },
             {
                 test: /\.js$/,

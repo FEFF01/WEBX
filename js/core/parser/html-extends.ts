@@ -299,10 +299,11 @@ function scan_tag(tokenizer: Tokenizer, start: number) {
     return tag;
 }
 function left_tag_filter(tokenizer: Tokenizer) {
-    if ((/^<|<\/$/.test(tokenizer.curly_stack[0]))) {
+    /*if ((/^<|<\/$/.test(tokenizer.curly_stack[0]))) {
         debugger;
     }
-    return !(/^<|<\/$/.test(tokenizer.curly_stack[0]));
+    return !(/^<|<\/$/.test(tokenizer.curly_stack[0]));*/
+    return true;
 }
 
 let WEBX_PUNCTUATORS = PUNCTUATORS.concat(

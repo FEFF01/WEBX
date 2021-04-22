@@ -4361,6 +4361,11 @@ path-to-regexp@0.1.7:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha1-32BBeABfUi8V60SQ5yR6G/qmf4w=
 
+path-to-regexp@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.2.0.tgz#f7b3803336104c346889adece614669230645f38"
+  integrity sha512-f66KywYG6+43afgE/8j/GoiNyygk/bnoCbps++3ErRKsIYkGGupyv07R2Ok5m9i67Iqc+T2g1eAUGUPzWhYTyg==
+
 path-type@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/path-type/-/path-type-3.0.0.tgz#cef31dc8e0a1a3bb0d105c0cd97cf3bf47f4e36f"
@@ -5760,10 +5765,10 @@ websocket-extensions@>=0.1.1:
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
   integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
-webx-loader@0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/webx-loader/-/webx-loader-0.0.2.tgz#4621cb3bee67f737787cf69d12b4ce3df6322e56"
-  integrity sha512-ta3lcuTmJGAftQxLlRzS4CA6Hr6DvG8rWVoc6y3N6Uv6mWY3ywD4Laqcm6Rdq5hf1szLCx+NrDXNFA4FadsvUA==
+webx-loader@0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/webx-loader/-/webx-loader-0.0.3.tgz#c86eae4cd8b796fea6d0354f6c3716c19a8f9b83"
+  integrity sha512-pm28uMeacYV3m6EaIrxIUFywUptHHifxvqcWYUO7cY5nHEEg4VN6B9W0wIC64V2snkDLpSfUf7pKMzqPBefunA==
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

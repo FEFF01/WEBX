@@ -5,8 +5,20 @@ import {
 import { ProxyNode } from './proxy'
 import { IDENTIFIER } from './astgen'
 
-function convert(ast: Node) {
-    return new ProxyNode(ast).node;
+function convert(ast: Node, external_declarations?: Array<string>) {
+    let used_declarators: Set<string>;
+    if (external_declarations) {
+        used_declarators = new Set();
+        ProxyNode.isExternalDeclaration = function (id: string) {
+            if (external_declarations.includes(id)) {
+                used_declarators.add(id);
+                return true;
+            }
+        }
+    }
+    let res = new ProxyNode(ast).node;
+    ProxyNode.isExternalDeclaration = null;
+    return external_declarations ? [res, Array.from(used_declarators)] : res;
 }
 let id = IDENTIFIER("_webx");
 
@@ -303,6 +315,22 @@ const runtime = {
                 property: {
                     type: "Identifier",
                     name: "entryStatement"
+                },
+                computed: false
+            }
+        },
+        {
+            type: "VariableDeclarator",
+            id: {
+                type: "Identifier",
+                name: "_webx_create_component"
+            },
+            init: {
+                type: "MemberExpression",
+                object: id,
+                property: {
+                    type: "Identifier",
+                    name: "createComponent"
                 },
                 computed: false
             }

@@ -27,6 +27,7 @@ declare function _ProxyNode(node: Node, parent?: ProxyNode, prop?: string | numb
 declare class ProxyNode {
     node: any;
     parent?: ProxyNode;
+    static isExternalDeclaration: (id: string) => boolean;
     [PROXY_NODE.FUNCTION_DECLARES]: Record<string, any>;
     [PROXY_NODE.FUNCTION_SCOPED_STACK]: Array<ProxyNode>;
     [PROXY_NODE.BLOCK_DECLARES]: Record<string, any>;

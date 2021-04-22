@@ -4,7 +4,7 @@ import {
 } from '../../Dison/js/interfaces';
 
 import {
-    
+
     SEQUENCE_EXPRESSION,
     RETURN_STATEMENT,
     LITERAL,
@@ -27,74 +27,135 @@ import { volatileId, decodeDeclarator, decodeDeclarations, DeclareProps, num2id 
 import { SANDOBX_OPTION } from '../../obb/js/obb';
 
 
-function CREATE_COMPONENT(id: string, operations?: Array<Node>) {
+function CREATE_COMPONENT(id: string, props: Array<Node>, children: Array<Node>) {
+
+    let args: Array<Node> = [IDENTIFIER(id)];
+    if (props.length || children.length) {
+        args.push(
+            props.length
+                ? _AutoRun(FUNCTION_EXPRESSION(props, [IDENTIFIER("_webx$_props")]), true)
+                : LITERAL(0)
+        );
+        children.length && args.push(
+            _AutoRun(FUNCTION_EXPRESSION(children, [IDENTIFIER("_webx_el")]), true)
+        );
+    }
+    return CALL_EXPRESSION(
+        IDENTIFIER("_webx_create_component"),
+        ...args
+    );
+
+    /*
+    let data = OBSERVABLEABLE({
+        type: "ObjectExpression",
+        properties: []
+    });
+    if (!props.length && !children.length) {
+        //如果返回的是 Expression 该结果将不能动态变更 例如  CREATE_ELEMENT 内的 <br/>
+        return RETURN_STATEMENT(CALL_EXPRESSION(IDENTIFIER(id), data));
+    }
+
+    let component = CALL_EXPRESSION(IDENTIFIER(id), IDENTIFIER("_webx$_props"));
     let body: Array<Node> = [
         VARIABLE_DECLARATION([
             VARABLE_DECLARATOR(
                 "_webx$_props",
-                OBSERVABLEABLE({
-                    type: "ObjectExpression",
-                    properties: [
-                        {
-                            type: "Property",
-                            key: {
-                                "type": "Identifier",
-                                "name": "children"
-                            },
-                            computed: false,
-                            value: ARRAY_EXPRESSION(),
-                            kind: "init",
-                            method: false,
-                            shorthand: false
-                        }
-                    ]
-                })
-            )
-        ]),
-        VARIABLE_DECLARATION([
-            VARABLE_DECLARATOR(
-                "_webx_el",
-                MEMBER_EXPRESSION(
-                    IDENTIFIER("_webx$_props"),
-                    IDENTIFIER("children")
-                )
+                data
             )
         ])
     ];
 
-    operations && body.push(...operations);
-    body.push(
-        RETURN_STATEMENT(CALL_EXPRESSION(IDENTIFIER(id), IDENTIFIER("_webx$_props")))
-    )
-    return AUTORUN(body, true);
+
+    body.push(...props);
+
+    if (children && children.length) {
+        body.push(VARIABLE_DECLARATION([
+            VARABLE_DECLARATOR(
+                "_webx_el",
+                OBSERVABLEABLE(ARRAY_EXPRESSION())
+            )
+        ]));
+        component.arguments.push(IDENTIFIER("_webx_el"));
+        body.push(
+            VARIABLE_DECLARATION([
+                VARABLE_DECLARATOR("_webx_cmp", component)
+            ]),
+            {
+                type: "IfStatement",
+                test: {
+                    type: "LogicalExpression",
+                    operator: "||",
+                    left: {
+                        type: "BinaryExpression",
+                        operator: "===",
+                        left: {
+                            type: "Identifier",
+                            name: "_webx_cmp"
+                        },
+                        right: {
+                            type: "Literal",
+                            value: null,
+                            raw: "null"
+                        }
+                    },
+                    right: {
+                        type: "BinaryExpression",
+                        operator: "===",
+                        left: {
+                            type: "Identifier",
+                            name: "_webx_cmp"
+                        },
+                        right: {
+                            type: "Identifier",
+                            name: "undefined"
+                        }
+                    }
+                },
+                consequent: {
+                    type: "ReturnStatement",
+                    argument: null
+                }
+            }
+        );
+
+        body.push(...children);
+        body.push(ASSIGNMENT_STATEMENT(
+            MEMBER_EXPRESSION(IDENTIFIER("_webx$_props"), IDENTIFIER("children")),
+            IDENTIFIER("_webx_el")
+        ))
+        body.push(RETURN_STATEMENT(IDENTIFIER("_webx_cmp")));
+    } else {
+        body.push(RETURN_STATEMENT(component));
+    }
+    return body;*/
+    //return AUTORUN(body, true);
 }
 
 
-function CREATE_ELEMENT(tag: string, operations?: Array<Node>) {
-    if (!operations || !operations.length) {
-        return CALL_EXPRESSION(
-            IDENTIFIER("_webx_create_element"),
-            LITERAL(tag)
-        );
+function CREATE_ELEMENT(tag: string, props: Array<Node>, children: Array<Node>) {
+    let element = CALL_EXPRESSION(
+        IDENTIFIER("_webx_create_element"),
+        LITERAL(tag)
+    );
+    if (!props.length && !children.length) {
+        return element;
     }
     let body: Array<Node> = [
         VARIABLE_DECLARATION(
             [
                 VARABLE_DECLARATOR(
                     "_webx_el",
-                    CALL_EXPRESSION(
-                        IDENTIFIER("_webx_create_element"),
-                        LITERAL(tag)
-                    )
+                    element
                 )
             ]
+        ),
+        ...children,
+        ...props,
+        RETURN_STATEMENT(
+            IDENTIFIER("_webx_el")
         )
     ];
-    body.push(...operations);
-    body.push(RETURN_STATEMENT(
-        IDENTIFIER("_webx_el")
-    ));
-    return AUTORUN(body, true);
+    return body;//AUTORUN(body, true);
 }
 
 

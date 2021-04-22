@@ -259,6 +259,37 @@ function makeMarks(scoped_node: ProxyNode) {
 
 }
 
+function isPurelyReactiveExpression(expr: Node) {
+    switch (expr.type) {
+        case "Identifier":
+            if (!/^_webx\$_/.test(expr.name)) {
+                return false;
+            }
+        case "Literal":
+            return true;
+        case "MemberExpression":
+            if (
+                expr.property.type === "Literal"
+                || !expr.computed &&
+                expr.property.type === "Identifier"
+            ) {
+                return isPurelyReactiveExpression(expr.object)
+            }
+            break;
+    }
+    return false;
+
+    /*if (expr.type === "MemberExpression"
+        && expr.object.type === "Identifier"
+        && /^_webx\$_/.test(expr.object.name)
+        && (
+            !expr.computed &&
+            expr.property.type === "Identifier"
+            || expr.property.type === "Literal"
+        )) {
+
+    }*/
+}
 
 function makeObserver(scoped_node: ProxyNode, depth: number) {
 
@@ -288,6 +319,7 @@ function makeObserver(scoped_node: ProxyNode, depth: number) {
             let key = declare_keys[index];
             let state = observer_state[key];
             let value = block_declares[key];
+
 
             if (state & OBSERVER_MARK.NEED_REDECLARE) {
                 for (let i = 0; i < value.length; i += 3) {
@@ -387,15 +419,7 @@ function makeObserver(scoped_node: ProxyNode, depth: number) {
                                  */
                                 if (
                                     value.length === 3
-                                    && (
-                                        declarator_init.type === "MemberExpression"
-                                        && declarator_init.object.type === "Identifier"
-                                        && /^_webx\$_/.test(declarator_init.object.name)
-                                        && (
-                                            declarator_init.property.type === "Identifier"
-                                            || declarator_init.property.type === "Literal"
-                                        )
-                                    )
+                                    && isPurelyReactiveExpression(declarator_init)
                                 ) {
                                     observer_map[key] = declarator_init;
                                     base_id -= 1;
@@ -403,8 +427,7 @@ function makeObserver(scoped_node: ProxyNode, depth: number) {
                                     continue;
                                 }
                                 if (
-                                    scoped_node[PROXY_NODE.SCOPE_STATUS] & SCOPE_STATUS.AUTORUN
-                                    && !(
+                                    !(
                                         declarator_init.type === "Literal"
                                         || declarator_init.type === "Identifier"
                                         && /^_webx\$_/.test(declarator_init.name)

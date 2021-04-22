@@ -20,8 +20,7 @@ yarn add webx-loader --dev
 ```javascript
     {
         test: /\.webx$/,
-        loader: "webx-loader",
-        exclude: /node_modules/,
+        loader: "webx-loader"
     }
 ```
 
@@ -51,7 +50,7 @@ yarn add webx-loader --dev
     let add=function(){}
     <button onclick=@(add)/> 
 ```
-> * 声明仅在初始化时取值不做绑定：
+> * 声明非绑定值：
 ```xml
 <span title=name>((name))<span>
 <span title=`name : ${name}`>((name))<span> // 这里的 `` 只是 es6 的模板表达式，属性 = 右边可以是几乎所有的表达式
@@ -164,6 +163,56 @@ yarn add webx-loader --dev
         }
     </ul>
     document.body.appendChild(view);
+```
+
+>  使用路由
+
+> * 在 .webx 文件中如果使用到 `<Router/>` 或 `<RouterLink/>` 组件则会自动引入 Router 相关支持
+> * Router 或者 RouterLink 相关所有字段都可以使用 @() 做绑定声明
+
+> * Router 可以存在于组件中，子组件中的 Router 将会接着上级具有相同 mode 的 Router 匹配剩余部分做响应式匹配
+> * Router 支持 path mode component 等属性，如果指定了 component 则 Router 会将接收到的属性传递至 component
+> * path 可以为字符串或者为字符串数组,可指定模式与 to 字段相同和 cd 命令差别不大，当 path 属性指定为相对路径时，为相对于当前具有相同 mode 的上级 Router （如果不存在则为根）的路径
+
+> * RouterLink 支持 to mode action tag 等属性，其他额外属性会传递至 tag 指定的元素
+> * RouterLink 如果 to 属性指定为相对路径时，为相对于当前具有相同 mode 的当前 Router （如果不存在则为根）的路径
+> * to 可以指定 'xx' '/xx' './xxx' '../xx' 等模式 ，其中 'xx' './xxx' '../xx' 为相对路径，'/xx' 表示根路径
+> * tag 默认为 a ，如果 tag 为 a 且没有指定 href 属性，则会自动根据当前情况生成 href
+> * action 默认为 append , 可以指定 append replace back 三种选项
+
+> * mode 默认为上级 Router 元素的 mode 属性如果不存在则为 hash ，可以指定 hash history 两种选项
+
+```xml
+document.body.appendChild(
+    <div>
+        <RouterLink to="/test" mode="hash">to test</RouterLink>
+        <Router path="/test" mode="hash">
+            test
+            <br/>
+            <RouterLink to="./one" action="replace">01</RouterLink>
+            <RouterLink to="./two" action="replace">02</RouterLink>
+            <br/>
+            <RouterLink to="../" action="back">back</RouterLink>
+            <RouterLink to="/" action="back">back</RouterLink>
+            <br/>
+            <Router 
+                path=["/:bar","../:bar/:foo"]
+                component=function({children,match:{bar,foo}}){
+                    return <span>
+                        @:children;
+                        <br/>
+                        @:"bar : " + bar;
+                        <br/>
+                        @:"foo : " + foo;
+                        <br/>
+                    </span>
+                }
+            > test 00 </Router>
+            <Router path="one"> test 01 </Router>
+            <Router path="./two"> test 02 </Router>
+        </Router>
+    </div>
+)
 ```
 
 

@@ -21,10 +21,6 @@ declare const enum TRANSACTS_OPTION {
     WRAPUP = 8,
     PLAIN = 18
 }
-declare type TRANSACTS_CONFIG = TRANSACTS_OPTION | {
-    option: TRANSACTS_OPTION;
-    hook?: (reactions: Array<Subscriber>) => void;
-};
 declare const enum RECORD_TYPE {
     OWN = 1,
     REF = 2,
@@ -84,6 +80,9 @@ declare class Subscriber {
     undepend(set: ISubscriberSet): void;
     depend(set: ISubscriberSet): void;
     clear(shallow?: boolean): void;
+    private _once;
+    once(event: string, callback: Function): void;
+    emit(event: string): void;
     unmount(shallow?: boolean): void;
     private _sandbox;
     mount(parent?: Subscriber): Subscriber;
@@ -95,7 +94,7 @@ declare class Subscriber {
     accu: number;
     private _run;
 }
-declare function transacts(option: TRANSACTS_CONFIG, fn: Function, ...args: Array<any>): any;
+declare function transacts(option: TRANSACTS_OPTION, fn: Function, ...args: Array<any>): any;
 declare type ReflectCall = (fn: Function, ...args: Array<any>) => any;
 declare function atom<T = Function>(fn: T): T;
 declare const runInAtom: ReflectCall;

@@ -45,12 +45,14 @@ import {
 } from './astgen'
 
 
-function NEXT_NODES(expr: Node, depth: number) {
-    return CALL_STATEMENT(
+function NEXT_NODES(expr: Node, depth: number, is_reactive: boolean) {
+    let args = [
         IDENTIFIER("_webx_next_nodes"),
         IDENTIFIER("_webx_t_sibling" + depth),
         expr
-    );
+    ];
+    is_reactive && args.push(LITERAL(1));
+    return CALL_STATEMENT.apply(null, args);
 }
 
 function SET_NODES(expr: Node, depth: number) {
@@ -202,13 +204,15 @@ function NEXT_CHILD(getter?: Node, is_reactive?: boolean) {
     ];
     if (getter) {
         if (is_reactive) {
-            args.push(_AutoRun(FUNCTION_EXPRESSION(RETURN_STATEMENT(getter))));
+            args.push(_AutoRun(getter));
             args.push(LITERAL(1));
+            /*args.push(_AutoRun(FUNCTION_EXPRESSION(RETURN_STATEMENT(getter))));
+            args.push(LITERAL(1));*/
         } else {
             args.push(getter);
         }
     }
-    return CALL_STATEMENT.apply(null, args);
+    return CALL_EXPRESSION.apply(null, args);
 }
 
 function NEXT_CHILD_STATEMENT(getter?: Node, is_reactive?: boolean) {
@@ -276,7 +280,7 @@ function polyfill(node: Node, depth: number, binding: boolean): Node {
                 || type === "Element"
             ) {
                 child_count += 1;
-                return NEXT_NODES(expression, depth - 1);
+                return NEXT_NODES(expression, depth - 1, type === "Element");
             } else if (
                 binding
                 || type === "Identifier"

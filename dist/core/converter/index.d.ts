@@ -1,5 +1,5 @@
 import { Node } from '../../Dison/js/interfaces';
-declare function convert(ast: Node): any;
+declare function convert(ast: Node, external_declarations?: Array<string>): any;
 declare const runtime: {
     type: string;
     kind: string;
