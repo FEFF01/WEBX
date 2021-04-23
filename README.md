@@ -5,7 +5,7 @@
 > * 其实这是个响应式的 `JS` ,只是额外支持了 `HTML` 的字面表达
 > * 和一般的 `MV*` 框架实现方式不太一样，`WEBX` 通过编译时语义分析转化将更改的响应最小化（不需要在运行时执行庞大的 `VDOM` 比对），更新效率大概是 `VUE` 的 5 倍以上，不过现阶段生成耗时也是 `VUE` 的 1.5 倍
 
-![image](https://pic2.zhimg.com/v2-2ffcd056f72e4b521cfe4f7ac696e091_b.webp)
+![image](https://feff01.github.io/static/img/webx_1.gifp)
 
 ### 测试
 > * [在线代码编辑器](https://feff01.github.io/WEBX/dist/editor.html)
@@ -17,7 +17,7 @@
 ```bash
 yarn add webx-loader --dev
 ```
-> * 使用 （ webpack.config -> module -> rules -> ）
+> * 配置 webpack loader （ webpack.config -> module -> rules -> ）
 ```javascript
     {
         test: /\.webx$/,
