@@ -1,8 +1,7 @@
 
-import list, { component, style } from '../test/index.webx';
+import list, { element } from '../test/index.webx';
 
-document.head.appendChild(style);
-document.body.appendChild(component);
+document.body.appendChild(element);
 
 
 setInterval(function () {

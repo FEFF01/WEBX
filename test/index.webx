@@ -1,15 +1,16 @@
 
 import MyComponent from './MyComponent.webx';
-import style from './MyComponent.style.webx';
+import './MyComponent.style.webx';
 
 let list=[
     {name:"aaa"},
     {name:"bbb",nodes:[{name:"ccc"}]}
 ]
+
 document.body.appendChild(
     <div>
-        <RouterLink to="/test" mode="hash">to test</RouterLink>
-        <Router path="/test" mode="hash">
+        <RouterLink to="/test" mode="history">to test</RouterLink>
+        <Router path="/test" mode="history">
             test
             <br/>
             <RouterLink to="./one" action="replace">01</RouterLink>
@@ -34,9 +35,25 @@ document.body.appendChild(
             <Router path="one"> test 01 </Router>
             <Router path="./two"> test 02 </Router>
         </Router>
+
+        <Router 
+            path="/:size"
+            component=function({match:{size}}){
+                return <style>
+                    body{
+                        font-size:@{size}px;
+                    }
+                </style>
+            }
+        />
+        @:for(let size of [12,16,24]){
+            <br/>
+            <RouterLink to=@("/"+size)  mode="hash" action="replace">
+                font size : @{size}
+            </RouterLink>
+        }
     </div>
 )
 
-export {style};
-export const component=<MyComponent list=@(list)/>;
+export const element=<MyComponent list=@(list)/>;
 export default list

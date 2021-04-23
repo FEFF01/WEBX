@@ -282,9 +282,7 @@ class NodeList extends Sibling {
                     cursor < old_nodes.length
                     && (old_node = old_nodes[cursor]).nodeType === Node.TEXT_NODE
                 ) {
-                    if (_webx.getText(old_node) != new_node) {
-                        _webx.setText(old_node, new_node);
-                    }
+                    _webx.setText(old_node, new_node);
                     new_node = old_node;
                 } else {
                     new_node = _webx.createTextNode(new_node);

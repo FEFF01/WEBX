@@ -1,7 +1,11 @@
 
 let color="#ea0";
-export default <style>
+
+
+document.head.appendChild(
+<style>
     .my-component button{
         color:((color));
     }
 </style>
+)

@@ -11,7 +11,8 @@
 > * [在线代码编辑器](https://feff01.github.io/WEBX/dist/editor.html)
 > * [40000 递归组件生成 & 更新测试](https://feff01.github.io/WEBX/dist/performance-webx.html)
 
-### 使用（ 现在只有简易的 webpack loader ）
+### 使用
+
 > * 安装
 ```bash
 yarn add webx-loader --dev
@@ -23,6 +24,7 @@ yarn add webx-loader --dev
         loader: "webx-loader"
     }
 ```
+> * 任意 `webpack` 架子配置 `webx-loader` 后就能和使用普通 `.js` 文件一样使用 `.webx` 文件，[.webx demo](./test/)
 
 ### 主要规则
 
@@ -172,6 +174,7 @@ yarn add webx-loader --dev
 
 > * Router 可以存在于组件中，子组件中的 Router 将会接着上级具有相同 mode 的 Router 匹配剩余部分做响应式匹配
 > * Router 支持 path mode component 等属性，如果指定了 component 则 Router 会将接收到的属性传递至 component
+> * 不同 mode 的 Router 可以混搭共存
 > * path 可以为字符串或者为字符串数组,可指定模式与 to 字段相同和 cd 命令差别不大，当 path 属性指定为相对路径时，为相对于当前具有相同 mode 的上级 Router （如果不存在则为根）的路径
 
 > * RouterLink 支持 to mode action tag 等属性，其他额外属性会传递至 tag 指定的元素

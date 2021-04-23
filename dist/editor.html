@@ -31,6 +31,38 @@ let support_list=[
 
 let color="#333";
 
+
+document.body.appendChild(
+    <div>
+        <RouterLink to="/test" mode="hash">to test</RouterLink>
+        <Router path="/test" mode="hash">
+            test
+            <br/>
+            <RouterLink to="./one" action="replace">01</RouterLink>
+            <RouterLink to="./two" action="replace">02</RouterLink>
+            <br/>
+            <RouterLink to="../" action="back">back</RouterLink>
+            <RouterLink to="/" action="back">back</RouterLink>
+            <br/>
+            <Router 
+                path=["/:bar","../:bar/:foo"]
+                component=function({children,match:{bar,foo}}){
+                    return <span>
+                        @:children;
+                        <br/>
+                        @:"bar : " + bar;
+                        <br/>
+                        @:"foo : " + foo;
+                        <br/>
+                    </span>
+                }
+            > test 00 </Router>
+            <Router path="one"> test 01 </Router>
+            <Router path="./two"> test 02 </Router>
+        </Router>
+    </div>
+)
+
 document.body.appendChild(
     <div>
         <button
