@@ -89,7 +89,8 @@ function NEXT_SIBLING(curr: number, prev: number = curr - 1) {
 let child_count = 0;
 function NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
     node: Node,
-    depth: number
+    depth: number,
+    tag: string | number
 ) {
     let { object, params, body } = node;
 
@@ -99,7 +100,7 @@ function NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
     let declarations = [];
 
 
-    let id = IDENTIFIER(`_webx$_D${depth}_entry`);
+    let id = IDENTIFIER(`_webx$_T${tag}_D${depth}_entry`);
     for (let i = 0; i < params.length; i++) {
         let param = params[i];
         if (!param) {
@@ -138,12 +139,9 @@ function NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
                 break;
         }
     }
-    /*
-    let _child_count = child_count;
-    child_count = 0;*/
 
 
-    body = NEXT_BLOCK_SIBLING(body, depth + 2, false, false);
+    body = NEXT_BLOCK_SIBLING(body, depth + 2, tag, false, false);
 
     body.type !== "BlockStatement" && (body = BLOCK_STATEMENT(body))
 
@@ -172,13 +170,12 @@ function NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
     if (child_count) {
         res = BLOCK_STATEMENT([NEXT_SIBLING(prop_depth, depth - 1), res])
     }
-    //child_count += _child_count;
 
     return res;
 }
 
 
-function NEXT_FOR_EACH_SIBLING_STATEMENT(node: Node, depth: number) {
+function NEXT_FOR_EACH_SIBLING_STATEMENT(node: Node, depth: number, tag: string | number) {
     let { left, right, body, type } = node;
     if (left.type !== "VariableDeclaration" || left.kind !== "let") {
         return;
@@ -192,7 +189,8 @@ function NEXT_FOR_EACH_SIBLING_STATEMENT(node: Node, depth: number) {
             params: type === "ForOfStatement" ? [id] : [null, id],
             body
         },
-        depth
+        depth,
+        tag
     );
 }
 
@@ -223,6 +221,7 @@ function NEXT_CHILD_STATEMENT(getter?: Node, is_reactive?: boolean) {
 function NEXT_BLOCK_SIBLING(
     nodes: Array<Node>,
     depth: number,
+    tag: string | number,
     autorun: boolean = true,
     binding: boolean = true
 ) {
@@ -239,10 +238,10 @@ function NEXT_BLOCK_SIBLING(
     for (let node of nodes) {
         switch (node.type) {
             case "BindingDeclaration":
-                reactive_nodes.push(...BINDING_DECLARATION(node.declaration, next_step));
+                reactive_nodes.push(...BINDING_DECLARATION(node.declaration, next_step, tag));
                 break;
             default:
-                reactive_nodes.push(polyfill(node, next_step, _binding));
+                reactive_nodes.push(polyfill(node, next_step, tag, _binding));
                 break;
         }
         child_count && (_child_count += 1);
@@ -268,7 +267,7 @@ function NEXT_BLOCK_SIBLING(
     child_count = _child_count;
     return res;
 }
-function polyfill(node: Node, depth: number, binding: boolean): Node {
+function polyfill(node: Node, depth: number, tag: string | number, binding: boolean): Node {
     child_count = 0;
     let _child_count = 0;
     switch (node.type) {
@@ -299,7 +298,7 @@ function polyfill(node: Node, depth: number, binding: boolean): Node {
             for (let _case of node.cases) {
                 _case.consequent = _case.consequent.map(
                     (statement: Node) => {
-                        let res = polyfill(statement, depth + 1, false);
+                        let res = polyfill(statement, depth + 1, tag, false);
                         _child_count += child_count;
                         child_count = 0;
                         return res;
@@ -308,21 +307,21 @@ function polyfill(node: Node, depth: number, binding: boolean): Node {
             }
             break;
         case "BlockStatement":
-            return NEXT_BLOCK_SIBLING(node.body, depth, false, false);
+            return NEXT_BLOCK_SIBLING(node.body, depth, tag, false, false);
         case "BindingStatement":
             if (node.value === "@autorun") {
                 return node;
             }
-            return NEXT_BLOCK_SIBLING([node.statement], depth, true, true);
+            return NEXT_BLOCK_SIBLING([node.statement], depth, tag, true, true);
         case "EntryStatement":
-            return NEXT_NEXT_ENTRY_SIBLING_STATEMENT(node, depth);
+            return NEXT_NEXT_ENTRY_SIBLING_STATEMENT(node, depth, tag);
         case "PreventStatement":
             return node;
         case "IfStatement":
-            return NEXT_IF_SIBLING_STATEMENT(node, depth);
+            return NEXT_IF_SIBLING_STATEMENT(node, depth, tag);
         case "ForInStatement":
         case "ForOfStatement":
-            let res = NEXT_FOR_EACH_SIBLING_STATEMENT(node, depth);
+            let res = NEXT_FOR_EACH_SIBLING_STATEMENT(node, depth, tag);
             if (res) {
                 return res;
             }
@@ -332,10 +331,10 @@ function polyfill(node: Node, depth: number, binding: boolean): Node {
                     let value = node[key];
                     if (value && value.type) {
                         if (value.type === "BlockStatement") {
-                            node[key] = NEXT_BLOCK_SIBLING(value.body, depth + 1, false, false);
+                            node[key] = NEXT_BLOCK_SIBLING(value.body, depth + 1, tag, false, false);
                             _child_count += child_count;
                         } else if (isStatement(value)) {
-                            node[key] = NEXT_BLOCK_SIBLING([value], depth + 1, false, false);
+                            node[key] = NEXT_BLOCK_SIBLING([value], depth + 1, tag, false, false);
                             _child_count += child_count;
                         }
                     }
@@ -360,18 +359,18 @@ function polyfill(node: Node, depth: number, binding: boolean): Node {
     }
     return node;
 }
-function NEXT_IF_SIBLING_STATEMENT(node: Node, depth: number) {
+function NEXT_IF_SIBLING_STATEMENT(node: Node, depth: number, tag: string | number) {
     let test = node.test;
     let consequent = node.consequent;
     let alternate = node.alternate;
     let is_binding = false;
     consequent = consequent.type === "BlockStatement" ? consequent.body : [consequent];
 
-    consequent = NEXT_BLOCK_SIBLING(consequent, depth + 1, true, false);
+    consequent = NEXT_BLOCK_SIBLING(consequent, depth + 1, tag, true, false);
     child_count && (is_binding = true);
     if (alternate) {
         alternate = alternate.type === "BlockStatement" ? alternate.body : [alternate];
-        alternate = NEXT_BLOCK_SIBLING(alternate, depth + 1, true, false);
+        alternate = NEXT_BLOCK_SIBLING(alternate, depth + 1, tag, true, false);
         child_count && (is_binding = true);
     }
     if (is_binding) {
@@ -391,7 +390,7 @@ function NEXT_IF_SIBLING_STATEMENT(node: Node, depth: number) {
     return node;
 }
 
-function BINDING_DECLARATION(node: Node, depth: number) {
+function BINDING_DECLARATION(node: Node, depth: number, tag: string | number) {
     let res = [];
     for (let declaration of SPLIT_VARIABLE_DECLARATION(node)) {
         res.push(declaration);
@@ -405,6 +404,7 @@ function BINDING_DECLARATION(node: Node, depth: number) {
                     )
                 }],
                 depth,
+                tag,
                 false,
                 false
             )

@@ -5765,10 +5765,10 @@ websocket-extensions@>=0.1.1:
   resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
   integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
-webx-loader@0.0.4:
-  version "0.0.4"
-  resolved "https://registry.yarnpkg.com/webx-loader/-/webx-loader-0.0.4.tgz#9a581b037987e2b1122951f71c41db5bdecd56a9"
-  integrity sha512-44B5S/iACOYXyJew/Ak6Zt9UE5MttFZgR09S9yvs60+2Nh/kQQtgEhoDl8TEWVUQrOZyGfBPhubQR6/Xj4ZmSA==
+webx-loader@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/webx-loader/-/webx-loader-0.0.5.tgz#79f08bc320a2a26e0d801126083f52f948c572a2"
+  integrity sha512-o1J2yECvaqs4ildx+FN7XXknMsxhdbcwE6vu8JRJLIaB7weaH5OGA24kfPrd/0kUYvWPWLb7F79nsZhzFf+82g==
 
 which-boxed-primitive@^1.0.2:
   version "1.0.2"

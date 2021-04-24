@@ -691,7 +691,7 @@ function createComponent(node: Node) {
         );
     }
 
-    node.children && buildChildren(node.children, children);
+    node.children && buildChildren(node.children, children, this[PROXY_NODE.DEPTH]);
 
     return createNode(
         this,
@@ -735,7 +735,7 @@ function createElement(node: Node) {
     let props: Array<Node> = [];
     let children: Array<Node> = [];
 
-    node.children && buildChildren(node.children, children);
+    node.children && buildChildren(node.children, children, this[PROXY_NODE.DEPTH]);
 
     for (let attribute of node.openingTag.attributes) {
         let attribute_name = attribute.name.name;
@@ -770,7 +770,7 @@ function createElement(node: Node) {
     );
 }
 
-function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
+function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>, tag: string | number) {
     for (let node of target_nodes) {
         let getter: Node, is_reactive = false;
         switch (node.type) {
@@ -778,7 +778,7 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
                 getter = LITERAL(node.value);
                 break;
             case "BindingDeclaration":
-                bind_nodes.push(...BINDING_DECLARATION(node.declaration, 0));
+                bind_nodes.push(...BINDING_DECLARATION(node.declaration, 0, tag));
                 continue;
             case "Element":
                 getter = node;
@@ -799,7 +799,7 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
                 }
                 if (body.length > 1 || body[0].type !== "ExpressionStatement") {
                     bind_nodes.push(
-                        NEXT_BLOCK_SIBLING(body, 0)
+                        NEXT_BLOCK_SIBLING(body, 0, tag)
                     );
                     continue;
                 }
@@ -812,7 +812,7 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>) {
                 }
                 break;
             case "CSSRule":
-                buildChildren(node.children, bind_nodes);
+                buildChildren(node.children, bind_nodes, tag);
                 continue;
             default:
                 getter = node;
