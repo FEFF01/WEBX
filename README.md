@@ -169,7 +169,7 @@ yarn add webx-loader --dev
 
 >  使用路由
 
-> * 在 .webx 文件中如果使用到 `<Router/>` 或 `<RouterLink/>` 组件则会自动引入 Router 相关支持
+> * 在 .webx 文件中如果使用到未定义的 `<Router/>` 或 `<RouterLink/>` 组件则会自动引入 Router 相关支持
 > * Router 或者 RouterLink 相关所有字段都可以使用 @() 做绑定声明
 
 > * Router 可以存在于组件中，子组件中的 Router 将会接着上级具有相同 mode 的 Router 匹配剩余部分做响应式匹配
