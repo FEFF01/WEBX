@@ -3,7 +3,7 @@ declare function NEXT_CHILD_STATEMENT(getter?: Node, is_reactive?: boolean): {
     type: string;
     expression: Node;
 };
-declare function NEXT_BLOCK_SIBLING(nodes: Array<Node>, depth: number, tag: string | number, autorun?: boolean, binding?: boolean): Node | {
+declare function NEXT_BLOCK_SIBLING(nodes: Array<Node>, depth: number, tag: string | number, autorun: boolean, binding: boolean): Node | {
     type: string;
 };
 declare function BINDING_DECLARATION(node: Node, depth: number, tag: string | number): any[];

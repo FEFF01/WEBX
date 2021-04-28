@@ -69,8 +69,20 @@ function collect_next_syntax(
         parser.index += offset;
         self.collect_text_node(parser);
         let { scopes } = self;
-        let { context, index, children } = scopes;
+        let { index, children } = scopes;
         let stack_length = parser.curly_stack.length;
+        let context = _Context(parser);
+        context[CONTEXT.strict] = scopes.context[CONTEXT.strict];
+        Object.defineProperty(context, CONTEXT.inIteration, {
+            configurable: true,
+            get() {
+                return false;
+            },
+            set() {
+
+            }
+        });
+
         let node = parser.parseCustom(
             match_tree,
             context,

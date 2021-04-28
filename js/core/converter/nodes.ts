@@ -87,7 +87,7 @@ function NEXT_SIBLING(curr: number, prev: number = curr - 1) {
 
 
 let child_count = 0;
-function NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
+function NEXT_ENTRY_SIBLING_STATEMENT(
     node: Node,
     depth: number,
     tag: string | number
@@ -182,7 +182,7 @@ function NEXT_FOR_EACH_SIBLING_STATEMENT(node: Node, depth: number, tag: string 
     }
 
     let id = left.declarations[0].id;
-    return NEXT_NEXT_ENTRY_SIBLING_STATEMENT(
+    return NEXT_ENTRY_SIBLING_STATEMENT(
         {
             type: "EntryStatement",
             object: right,
@@ -222,9 +222,10 @@ function NEXT_BLOCK_SIBLING(
     nodes: Array<Node>,
     depth: number,
     tag: string | number,
-    autorun: boolean = true,
-    binding: boolean = true
+    autorun: boolean,
+    binding: boolean
 ) {
+
     child_count = 0;
     if (!nodes.length) {
         return EMPTY_STATEMENT();//BLOCK_STATEMENT([]);
@@ -310,11 +311,12 @@ function polyfill(node: Node, depth: number, tag: string | number, binding: bool
             return NEXT_BLOCK_SIBLING(node.body, depth, tag, false, false);
         case "BindingStatement":
             if (node.value === "@autorun") {
+                // 显式声明的 @autorun 是脱离渲染流的
                 return node;
             }
             return NEXT_BLOCK_SIBLING([node.statement], depth, tag, true, true);
         case "EntryStatement":
-            return NEXT_NEXT_ENTRY_SIBLING_STATEMENT(node, depth, tag);
+            return NEXT_ENTRY_SIBLING_STATEMENT(node, depth, tag);
         case "PreventStatement":
             return node;
         case "IfStatement":
@@ -322,9 +324,11 @@ function polyfill(node: Node, depth: number, tag: string | number, binding: bool
         case "ForInStatement":
         case "ForOfStatement":
             let res = NEXT_FOR_EACH_SIBLING_STATEMENT(node, depth, tag);
-            if (res) {
+            if (res !== undefined) {
                 return res;
             }
+        /*case "RetrunStatement":
+            return false;*/
         default:
             if (isStatement(node)) {
                 for (let key in node) {

@@ -799,7 +799,7 @@ function buildChildren(target_nodes: Array<Node>, bind_nodes: Array<Node>, tag: 
                 }
                 if (body.length > 1 || body[0].type !== "ExpressionStatement") {
                     bind_nodes.push(
-                        NEXT_BLOCK_SIBLING(body, 0, tag)
+                        NEXT_BLOCK_SIBLING(body, 0, tag, true, true)
                     );
                     continue;
                 }
