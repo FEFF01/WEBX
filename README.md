@@ -126,10 +126,11 @@ yarn add webx-loader --dev
      * 如果语句块内包含多条语句，
      * 则仅包含单独的 Identifier Literal Element 的语句都视为父级元素的子元素
      * 
-     * 通过这些方式声明的 for 或  if 语句中使用 return continue 会有限制，这些会在编译时给出警告，并不会从结果中剔除
+     * 通过这些方式声明的 for 或  if 语句中使用 break continue 会有限制，这些会在编译时给出警告，并不会从结果中剔除
      *（
-     *  暂时找不到内部实现上看起来不冗余又能很好支持 for if 中 使用 return continue 的方式，
-     *  其实 switch 语句并没有 break 的使用限制，因为 switch 使用频率较低内部语义转化实现上没有 for 或 if 优 
+     *  暂时找不到内部实现上看起来不冗余又能很好支持渲染流内 for if 中使用 break continue 的方式，
+     *  其实渲染流内 switch 语句并没有 break 的使用限制，因为 switch 使用频率较低内部语义转化实现上没有 for 或 if 优 
+     *  渲染流即是从HTML内部通过 @xx 插入的渲染 JS 逻辑（不包括内部声明的 function）
      * ）
      * 
      */
